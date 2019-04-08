@@ -1,0 +1,5 @@
+<h2>New User job</h2>
+
+<%= render "form.html", Map.put(assigns, :action, user_job_path(@conn, :create)) %>
+
+<span><%= link "Back", to: user_job_path(@conn, :index) %></span>

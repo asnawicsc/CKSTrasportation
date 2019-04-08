@@ -1,38 +1,119 @@
-<h2>Listing Users</h2>
+<div class="row">
+  <div class="col-lg-8">
+    <div class="card card-default">
+      <div class="card-body">
+        <p class="lead">Drag the job on the right into the grey panels.</p>
 
-<table class="table">
-  <thead>
-    <tr>
-      <th>Username</th>
-      <th>Password</th>
-      <th>Email</th>
-      <th>User type</th>
-      <th>User level</th>
-      <th>Pin</th>
-      <th>Crypted password</th>
+        <table class="table">
+          <thead>
+            <tr>
+              <th>User</th>
 
-      <th></th>
-    </tr>
-  </thead>
-  <tbody>
-<%= for user <- @users do %>
-    <tr>
-      <td><%= user.username %></td>
-      <td><%= user.password %></td>
-      <td><%= user.email %></td>
-      <td><%= user.user_type %></td>
-      <td><%= user.user_level %></td>
-      <td><%= user.pin %></td>
-      <td><%= user.crypted_password %></td>
+              <th>Jobs</th>
 
-      <td class="text-right">
-        <span><%= link "Show", to: user_path(@conn, :show, user), class: "btn btn-default btn-xs" %></span>
-        <span><%= link "Edit", to: user_path(@conn, :edit, user), class: "btn btn-default btn-xs" %></span>
-        <span><%= link "Delete", to: user_path(@conn, :delete, user), method: :delete, data: [confirm: "Are you sure?"], class: "btn btn-danger btn-xs" %></span>
-      </td>
-    </tr>
-<% end %>
-  </tbody>
-</table>
+            </tr>
+          </thead>
+          <tbody>
+            <%= for user <- @users do %>
+              <tr>
+                <td>
+                  <h2>
+                    <%= user.username %>
+                  </h2>
+                  <span><%= link "Show", to: user_path(@conn, :show, user), class: "btn btn-default btn-xs" %></span>
+                  <span><%= link "Edit", to: user_path(@conn, :edit, user), class: "btn btn-default btn-xs" %></span>
+                  <span><% link "Delete", to: user_path(@conn, :delete, user), method: :delete, data: [confirm: "Are you sure?"], class: "btn btn-danger btn-xs" %></span>
+                </td>
 
-<span><%= link "New User", to: user_path(@conn, :new) %></span>
+                <td>
+                  <div class="row sortable" style="min-height: 140px;  background-color: #65656533; padding: 10px; ">
+
+                  </div>
+                </td>
+
+              </tr>
+              <% end %>
+          </tbody>
+        </table>
+
+      </div>
+    </div>
+
+  </div>
+  <div class="col-lg-4">
+
+    <table class="table">
+      <thead>
+        <tr>
+          <th>No</th>
+
+          <th>Description</th>
+
+        </tr>
+      </thead>
+      <tbody>
+        <%= for job <- @jobs do %>
+          <tr>
+            <td>
+              <div class="col-sm-3 draggable" aria-label="<%= job.id %>">
+                <div class="card card-default">
+                  <div class="card-body" style="cursor: pointer; min-height: 100px; min-width: 100px;  background-color: white;">
+                    <%= job.job_no %>
+                      <div class="btn btn-xs btn-danger cancel" style="float: right;">
+                        X
+                      </div>
+
+                  </div>
+                </div>
+
+              </div>
+
+            </td>
+
+            <td>
+              <%= job.description %>
+            </td>
+
+          </tr>
+          <% end %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+
+<script type="text/javascript">
+  $(document).ready(function() {
+
+    
+   
+    $(".draggable").draggable({
+  
+      
+      revert: "invalid"
+    });
+
+$(".sortable").droppable({
+           drop: function( event, ui ) {
+         console.log(ui.helper[0].attributes["aria-label"].value);   
+var id = ui.helper[0].attributes["aria-label"].value
+
+$("#myModalSmall").find("modal-title").html("Assign this job?");
+$("#myModalSmall").find("btn-secondary").attr("aria-label", id)
+$("#myModalSmall").modal();
+
+$("#myModalSmall").on("click", ".btn-secondary", function(){
+
+$(this).attr("aria-label", id)
+console.log(this);
+});
+
+
+
+      }
+    });
+    $(document).on("click", ".cancel", function() {
+      $(this).parent().parent().parent().remove()
+    })
+  })
+</script>

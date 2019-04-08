@@ -21,6 +21,10 @@ defmodule Transporter.Settings do
     Repo.all(User)
   end
 
+  def list_users(level) do
+    Repo.all(from(u in User, where: u.user_level == ^level))
+  end
+
   @doc """
   Gets a single user.
 

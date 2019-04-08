@@ -1,0 +1,38 @@
+<h2>Show Activity</h2>
+
+<ul>
+
+  <li>
+    <strong>Job:</strong>
+    <%= @activity.job_id %>
+  </li>
+
+  <li>
+    <strong>Created by:</strong>
+    <%= @activity.created_by %>
+  </li>
+
+  <li>
+    <strong>Created:</strong>
+    <%= @activity.created_id %>
+  </li>
+
+  <li>
+    <strong>Message:</strong>
+    <%= @activity.message %>
+  </li>
+
+  <li>
+    <strong>Location:</strong>
+    <%= @activity.location %>
+  </li>
+
+  <li>
+    <strong>Fee:</strong>
+    <%= @activity.fee %>
+  </li>
+
+</ul>
+
+<span><%= link "Edit", to: activity_path(@conn, :edit, @activity) %></span>
+<span><%= link "Back", to: activity_path(@conn, :index) %></span>

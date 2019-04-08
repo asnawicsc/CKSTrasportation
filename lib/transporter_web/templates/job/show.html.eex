@@ -1,0 +1,48 @@
+<h2>Show Job</h2>
+
+<ul>
+
+  <li>
+    <strong>Job no:</strong>
+    <%= @job.job_no %>
+  </li>
+
+  <li>
+    <strong>Description:</strong>
+    <%= @job.description %>
+  </li>
+
+  <li>
+    <strong>Created by:</strong>
+    <%= @job.created_by %>
+  </li>
+
+  <li>
+    <strong>Last activity:</strong>
+    <%= @job.last_activity %>
+  </li>
+
+  <li>
+    <strong>Last by:</strong>
+    <%= @job.last_by %>
+  </li>
+
+  <li>
+    <strong>Last Updated:</strong>
+    <%= @job.updated_at |> Timex.shift(hours: 8) |> Timex.format!( "%Y-%m-%d %I:%M %P", :strftime) %>
+  </li>
+
+  <li>
+    <strong>Duration:</strong>
+    <%= @job.duration %>
+  </li>
+
+  <li>
+    <strong>Inserted:</strong>
+    <%= @job.inserted_at |> Timex.shift(hours: 8) |> Timex.format!( "%Y-%m-%d %I:%M %P", :strftime) %>
+  </li>
+
+</ul>
+
+<span><%= link "Edit", to: job_path(@conn, :edit, @job) %></span>
+<span><%= link "Back", to: job_path(@conn, :index) %></span>

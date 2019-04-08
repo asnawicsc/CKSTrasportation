@@ -22,6 +22,11 @@ defmodule TransporterWeb.Router do
     post("/authenticate_login", UserController, :authenticate_login)
     get("/logout", UserController, :logout)
     resources("/users", UserController)
+
+    resources("/jobs", JobController)
+    resources("/activities", ActivityController)
+    resources("/images", ImageController)
+    resources("/user_jobs", UserJobController)
   end
 
   # Other scopes may use custom stacks.

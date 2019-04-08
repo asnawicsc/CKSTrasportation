@@ -1,12 +1,19 @@
 defmodule TransporterWeb.UserController do
   use TransporterWeb, :controller
 
-  alias Transporter.Settings
-  alias Transporter.Settings.User
-
-  def index(conn, _params) do
+  def index(conn, params) do
     users = Settings.list_users()
-    render(conn, "index.html", users: users)
+
+    users =
+      if params["type"] != nil do
+        Settings.list_users(params["type"])
+      else
+        users
+      end
+
+    jobs = Logistic.list_jobs()
+
+    render(conn, "index.html", users: users, jobs: jobs)
   end
 
   def new(conn, _params) do
@@ -94,6 +101,8 @@ defmodule TransporterWeb.UserController do
         conn
         |> put_flash(:info, "Welcome!")
         |> put_session(:user_id, user.id)
+        |> put_session(:user_name, user.username)
+        |> put_session(:user_type, user.user_type)
         |> redirect(to: page_path(conn, :index))
       else
         conn

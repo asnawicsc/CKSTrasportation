@@ -23,13 +23,20 @@ defmodule TransporterWeb do
       import Plug.Conn
       import TransporterWeb.Router.Helpers
       import TransporterWeb.Gettext
+      alias Transporter.Repo
+      import Ecto.Query
+      alias Transporter.Settings
+      alias Transporter.Settings.User
+      alias Transporter.Logistic
+      alias Transporter.Logistic.{Activity, Job}
     end
   end
 
   def view do
     quote do
-      use Phoenix.View, root: "lib/transporter_web/templates",
-                        namespace: TransporterWeb
+      use Phoenix.View,
+        root: "lib/transporter_web/templates",
+        namespace: TransporterWeb
 
       # Import convenience functions from controllers
       import Phoenix.Controller, only: [get_flash: 2, view_module: 1]
@@ -40,6 +47,9 @@ defmodule TransporterWeb do
       import TransporterWeb.Router.Helpers
       import TransporterWeb.ErrorHelpers
       import TransporterWeb.Gettext
+
+      alias Transporter.Logistic
+      alias Transporter.Logistic.{Activity, Job}
     end
   end
 
@@ -55,6 +65,8 @@ defmodule TransporterWeb do
     quote do
       use Phoenix.Channel
       import TransporterWeb.Gettext
+      alias Transporter.Repo
+      import Ecto.Query
     end
   end
 

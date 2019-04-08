@@ -1,0 +1,36 @@
+<h2>Listing Activities</h2>
+
+<table class="table">
+  <thead>
+    <tr>
+      <th>Job</th>
+      <th>Created by</th>
+      <th>Created</th>
+      <th>Message</th>
+      <th>Location</th>
+      <th>Fee</th>
+
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+<%= for activity <- @activities do %>
+    <tr>
+      <td><%= activity.job_id %></td>
+      <td><%= activity.created_by %></td>
+      <td><%= activity.created_id %></td>
+      <td><%= activity.message %></td>
+      <td><%= activity.location %></td>
+      <td><%= activity.fee %></td>
+
+      <td class="text-right">
+        <span><%= link "Show", to: activity_path(@conn, :show, activity), class: "btn btn-default btn-xs" %></span>
+        <span><%= link "Edit", to: activity_path(@conn, :edit, activity), class: "btn btn-default btn-xs" %></span>
+        <span><%= link "Delete", to: activity_path(@conn, :delete, activity), method: :delete, data: [confirm: "Are you sure?"], class: "btn btn-danger btn-xs" %></span>
+      </td>
+    </tr>
+<% end %>
+  </tbody>
+</table>
+
+<span><%= link "New Activity", to: activity_path(@conn, :new) %></span>

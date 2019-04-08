@@ -1,0 +1,40 @@
+<h2>Listing Jobs</h2>
+
+<table class="table">
+  <thead>
+    <tr>
+      <th>Job no</th>
+      <th>Description</th>
+      <th>Created by</th>
+      <th>Last activity</th>
+      <th>Last by</th>
+      <th>Duration</th>
+
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+<%= for job <- @jobs do %>
+    <tr>
+      <td><%= job.job_no %></td>
+      <td><%= job.description %></td>
+      <td><%= job.created_by %></td>
+      <td><%= job.last_activity %></td>
+      <td><%= job.last_by %></td>
+      <td><%= job.duration %></td>
+
+      <td class="text-right">
+       <span><div class="btn btn-warning">Assign Forwarder</div></span>
+        <span><%= link "Show", to: job_path(@conn, :show, job), class: "btn btn-default btn-xs" %></span>
+        <span><%= link "Edit", to: job_path(@conn, :edit, job), class: "btn btn-default btn-xs" %></span>
+        <span><%= link "Delete", to: job_path(@conn, :delete, job), method: :delete, data: [confirm: "Are you sure?"], class: "btn btn-danger btn-xs" %></span>
+      </td>
+    </tr>
+<% end %>
+  </tbody>
+</table>
+
+<span><%= link "New Job", to: job_path(@conn, :new) %></span>
+
+
+</div>

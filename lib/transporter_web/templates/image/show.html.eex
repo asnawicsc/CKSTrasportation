@@ -1,0 +1,23 @@
+<h2>Show Image</h2>
+
+<ul>
+
+  <li>
+    <strong>Filename:</strong>
+    <%= @image.filename %>
+  </li>
+
+  <li>
+    <strong>Activity:</strong>
+    <%= @image.activity_id %>
+  </li>
+
+  <li>
+    <strong>Thumbnail:</strong>
+    <%= @image.thumbnail %>
+  </li>
+
+</ul>
+
+<span><%= link "Edit", to: image_path(@conn, :edit, @image) %></span>
+<span><%= link "Back", to: image_path(@conn, :index) %></span>

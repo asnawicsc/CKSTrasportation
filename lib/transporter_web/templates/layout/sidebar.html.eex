@@ -26,9 +26,9 @@
                   <!-- END user info-->
                   <!-- Iterates over all sidebar items-->
                   <li class="nav-heading ">
-                     <span >Management</span>
+                     <span >General</span>
                   </li>
-                  <%= if @conn.private.plug_session["user_type"] == "Admin" do %>
+          
                   <li class=" ">
                      <a href="/users" title="Widgets">
                         <div class="float-right badge badge-primary">30</div>
@@ -36,45 +36,26 @@
                         <span >Users</span>
                      </a>
                   </li>
-                  <% end %>
-                  <li class=" ">
-                     <a href="/users?q=staff" title="Widgets">
-                        <div class="float-right badge badge-info">30</div>
-                        <em class="fa fa-users"></em>
-                        <span >Staffs</span>
-                     </a>
-                  </li>
-                  <li class=" ">
-                     <a href="/<%= @conn.private.plug_session["org_name"]%>/restaurants" title="Widgets">
-                        <div class="float-right badge badge-warning">30</div>
-                        <em class="fa fa-store"></em>
-                        <span >Restaurants</span>
-                     </a>
-                  </li>
-                  <li class=" ">
-                     <a href="/organizations" title="Widgets">
-                        <div class="float-right badge badge-danger">30</div>
-                        <em class="fa fa-building"></em>
-                        <span >Organizations</span>
-                     </a>
-                  </li>
+             
+                 
+               
                   <li class="nav-heading ">
-                     <span >Food Menu</span>
+                     <span >Job Management</span>
                   </li>
            
                   <li class=" ">
-                     <a href="/<%= @conn.private.plug_session["org_name"]%>/items" title="Widgets">
+                     <a href="/jobs/new" title="Widgets">
                         <div class="float-right badge badge-purple">30</div>
                         <em class="fas fa-lemon"></em>
-                        <span >Menu Items</span>
+                        <span >Create New Job</span>
                      </a>
                   </li>
              
                   <li class=" ">
-                     <a href="/<%= @conn.private.plug_session["org_name"]%>/discounts" title="Widgets">
+                     <a href="/users?type=forwarder" title="Widgets">
                         <div class="float-right badge badge-success">30</div>
                         <em class="icon-grid"></em>
-                        <span >Discount Items</span>
+                        <span >Assign Job</span>
                      </a>
                   </li>
                   
@@ -82,26 +63,20 @@
                      <span >Reports</span>
                   </li>
                   <li class=" ">
-                     <a href="/reports/sales" title="Sales" >
+                     <a href="/" title="Jobs" >
                         <em class="icon-chemistry"></em>
-                        <span >Sales</span>
+                        <span >Job Status</span>
                      </a>
                      
                   </li>
                   <li class=" ">
-                     <a href="/shifts" title="Shift" >
+                     <a href="/" title="Containers" >
                         <em class="icon-chemistry"></em>
-                        <span >Shifts</span>
+                        <span >Container Status</span>
                      </a>
                      
                   </li>
-                   <li class=" ">
-                     <a href="/modallogs" title="Shift" >
-                        <em class="icon-chemistry"></em>
-                        <span >Modal Logs</span>
-                     </a>
-                     
-                  </li>
+               
                 
           
                   
