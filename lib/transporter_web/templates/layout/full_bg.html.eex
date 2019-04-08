@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+   <meta charset="utf-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+      <meta name="description" content="Transporter Web Portal">
+   <meta name="keywords" content="Gateman, Lorry Driver, Forwarder, Container, Logisctic Job management system">
+   <link rel="icon" type="image/x-icon" href="/favicon.ico">
+   <title>CKS Sdn Bhd</title>
+   <!-- =============== VENDOR STYLES ===============-->
+   <!-- FONT AWESOME-->
+   <link rel="stylesheet" href="vendor/@fortawesome/fontawesome-free-webfonts/css/fa-brands.css">
+   <link rel="stylesheet" href="vendor/@fortawesome/fontawesome-free-webfonts/css/fa-regular.css">
+   <link rel="stylesheet" href="vendor/@fortawesome/fontawesome-free-webfonts/css/fa-solid.css">
+   <link rel="stylesheet" href="vendor/@fortawesome/fontawesome-free-webfonts/css/fontawesome.css">
+   <!-- SIMPLE LINE ICONS-->
+   <link rel="stylesheet" href="vendor/simple-line-icons/css/simple-line-icons.css">
+   <!-- =============== BOOTSTRAP STYLES ===============-->
+   <link rel="stylesheet" href="css/bootstrap.css" id="bscss">
+   <!-- =============== APP STYLES ===============-->
+   <link rel="stylesheet" href="css/app.css" id="maincss">
+   <script src="/vendor/jquery/dist/jquery.js"></script>
+</head>
+
+<body>
+       <%= render("flash.html", conn: @conn)%>
+   <div class="wrapper">
+   <%= render @view_module, @view_template, assigns %>
+   </div>
+   <!-- =============== VENDOR SCRIPTS ===============-->
+   <!-- MODERNIZR-->
+   <script src="vendor/modernizr/modernizr.custom.js"></script>
+   <!-- JQUERY-->
+   <script src="vendor/jquery/dist/jquery.js"></script>
+   <!-- BOOTSTRAP-->
+   <script src="vendor/bootstrap/dist/js/bootstrap.js"></script>
+   <!-- STORAGE API-->
+   <script src="vendor/js-storage/js.storage.js"></script>
+   <!-- PARSLEY-->
+   <script src="vendor/parsleyjs/dist/parsley.js"></script>
+   <!-- =============== APP SCRIPTS ===============-->
+   <script src="js/app.js"></script>
+</body>
+
+</html>

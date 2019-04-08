@@ -1,0 +1,32 @@
+<link rel="stylesheet" href="/vendor/sweetalert/dist/sweetalert.css" >
+   <script src="/vendor/sweetalert/dist/sweetalert.min.js"></script>
+
+<script type="text/javascript">
+  $(document).ready(function(){
+
+  $("#backdrop").delay(200).fadeOut()
+
+  <%= cond do %>
+
+  <% get_flash(@conn, :info) != nil -> %>
+
+  swal(
+    '<%= get_flash(@conn, :info) %>',
+    '',
+    'success'
+  )
+  <% get_flash(@conn, :error) != nil -> %>
+
+
+  swal(
+    '<%= get_flash(@conn, :error) %>',
+    '',
+    'error'
+  )
+
+  <% true -> %>
+
+  <% end %>
+  
+})
+</script>

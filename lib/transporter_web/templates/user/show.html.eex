@@ -1,0 +1,43 @@
+<h2>Show User</h2>
+
+<ul>
+
+  <li>
+    <strong>Username:</strong>
+    <%= @user.username %>
+  </li>
+
+  <li>
+    <strong>Password:</strong>
+    <%= @user.password %>
+  </li>
+
+  <li>
+    <strong>Email:</strong>
+    <%= @user.email %>
+  </li>
+
+  <li>
+    <strong>User type:</strong>
+    <%= @user.user_type %>
+  </li>
+
+  <li>
+    <strong>User level:</strong>
+    <%= @user.user_level %>
+  </li>
+
+  <li>
+    <strong>Pin:</strong>
+    <%= @user.pin %>
+  </li>
+
+  <li>
+    <strong>Crypted password:</strong>
+    <%= @user.crypted_password %>
+  </li>
+
+</ul>
+
+<span><%= link "Edit", to: user_path(@conn, :edit, @user) %></span>
+<span><%= link "Back", to: user_path(@conn, :index) %></span>
