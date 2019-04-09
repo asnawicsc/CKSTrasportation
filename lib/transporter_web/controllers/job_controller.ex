@@ -22,14 +22,16 @@ defmodule TransporterWeb.JobController do
         case job_params["job_type"] do
           "Import" ->
             {:ok, act} =
-              Logistic.create_activity(%{
-                created_by: "System",
-                created_id: 0,
-                job_id: job.id,
-                message: "Pending assignment for Forwarder."
-              })
-
-            Logistic.update_job(job, %{last_activity: act.message, last_by: "System"})
+              Logistic.create_activity(
+                %{
+                  created_by: "System",
+                  created_id: 1,
+                  job_id: job.id,
+                  message: "Pending assignment for Forwarder."
+                },
+                job,
+                Repo.get(User, conn.private.plug_session["user_id"])
+              )
 
             true
 

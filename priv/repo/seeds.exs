@@ -9,3 +9,14 @@
 #
 # We recommend using the bang functions (`insert!`, `update!`
 # and so on) as they will fail if something goes wrong.
+
+alias Transporter.Repo
+import Ecto.Query
+alias Transporter.Settings
+alias Transporter.Settings.User
+alias Transporter.Logistic
+alias Transporter.Logistic.{Activity, Job, UserJob}
+
+Repo.delete_all(UserJob)
+Repo.delete_all(Job)
+Repo.delete_all(Activity)

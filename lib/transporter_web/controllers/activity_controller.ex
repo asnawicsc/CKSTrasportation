@@ -3,6 +3,7 @@ defmodule TransporterWeb.ActivityController do
 
   alias Transporter.Logistic
   alias Transporter.Logistic.Activity
+  require IEx
 
   def index(conn, _params) do
     activities = Logistic.list_activities()
@@ -15,13 +16,33 @@ defmodule TransporterWeb.ActivityController do
   end
 
   def create(conn, %{"activity" => activity_params}) do
-    case Logistic.create_activity(activity_params) do
-      {:ok, activity} ->
-        conn
-        |> put_flash(:info, "Activity created successfully.")
-        |> redirect(to: activity_path(conn, :show, activity))
-      {:error, %Ecto.Changeset{} = changeset} ->
-        render(conn, "new.html", changeset: changeset)
+    user = Repo.get(User, conn.private.plug_session["user_id"])
+    activity_params = Map.put(activity_params, "created_by", user.username)
+    activity_params = Map.put(activity_params, "created_id", user.id)
+
+    activity_params =
+      Map.put(activity_params, "message", "#{user.username} #{activity_params["message"]}")
+
+    job = Repo.get(Job, activity_params["job_id"])
+
+    assigned =
+      job.last_activity |> String.split(" ") |> List.pop_at(2) |> elem(0)
+      |> String.replace(".", "")
+
+    if user.username == assigned do
+      case Logistic.create_activity(activity_params, job) do
+        {:ok, activity} ->
+          conn
+          |> put_flash(:info, "Activity updated successfully.")
+          |> redirect(to: user_path(conn, :index))
+
+        {:error, %Ecto.Changeset{} = changeset} ->
+          render(conn, "new.html", changeset: changeset)
+      end
+    else
+      conn
+      |> put_flash(:error, "Wasnt assigned to you.")
+      |> redirect(to: user_path(conn, :index))
     end
   end
 
@@ -44,6 +65,7 @@ defmodule TransporterWeb.ActivityController do
         conn
         |> put_flash(:info, "Activity updated successfully.")
         |> redirect(to: activity_path(conn, :show, activity))
+
       {:error, %Ecto.Changeset{} = changeset} ->
         render(conn, "edit.html", activity: activity, changeset: changeset)
     end

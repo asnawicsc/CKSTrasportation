@@ -9,7 +9,7 @@
             <tr>
               <th>User</th>
 
-              <th>Jobs</th>
+              <th style="width: 80%;">Jobs</th>
 
             </tr>
           </thead>
@@ -26,9 +26,58 @@
                     <span><% link "Delete", to: user_path(@conn, :delete, user), method: :delete, data: [confirm: "Are you sure?"], class: "btn btn-danger btn-xs" %></span>
                 </td>
 
-                <td>
+                <td style="width: 80%;">
                   <div class="row sortable" aria-label="<%= user.id %>" style="min-height: 140px;  background-color: #65656533; padding: 10px; ">
+                    <%= for job <- user.jobs do %>
 
+
+                        <%= if job.last_activity != nil do %>
+                          <% who = job.last_activity |> String.split(" ") |> List.last |> String.replace(".", "") %>
+
+                          <%= if who == user.user_level do %>
+
+                                  <div class="col-sm-3">
+                        <div class="card card-default">
+                          <div class="card-header">
+                            <%= job.job_no %>
+                          </div>
+                          <div class="card-body" style="cursor: pointer; min-height: 100px; min-width: 100px;  background-color: white;">
+                            <%= job.last_activity %>
+                            <%= if job.last_activity != nil do %>
+                              <% who = job.last_activity |> String.split(" ") |> List.last |> String.replace(".", "") %>
+
+                              <%= if who == user.user_level do %>
+
+                                <form method="post" action="/activities/">
+                                  <input type="hidden" name="_csrf_token" value="<%= Phoenix.Controller.get_csrf_token %>">
+                                  <input type="hidden" name="activity[job_id]" value="<%= job.id %>">
+                  
+                                  <input type="hidden" name="activity[message]" value="accepted job <%= job.job_no %>.">
+                                  <button class="btn btn-xs btn-warning">Accept Job</button>
+                                </form>
+                                <% end %>
+                              <% end %>
+                          </div>
+                          <% seconds = DateTime.diff(Timex.now, DateTime.from_naive!(job.last_updated, "Etc/UTC"), 1) %>
+
+                            <div class="card-footer" style="font-size: 12px;">Updated<br>
+                              <%= Timex.Duration.from_seconds(seconds) |> Timex.format_duration( :humanized) |> String.split(",") |> hd() %> ago</div>
+
+                        </div>
+
+                      </div>
+                            <% else %>
+                           <% end %>
+
+                        <% end %>
+
+
+
+                   
+
+                     
+
+                      <% end %>
                   </div>
                 </td>
 
@@ -56,10 +105,12 @@
         <%= for job <- @jobs do %>
           <tr>
             <td>
-              <div class="col-sm-3 draggable" aria-label="<%= job.id %>">
+              <div class="col-sm-3 draggable" aria-label="<%= job.id %>" style="min-width: 200px;">
                 <div class="card card-default">
+                  <div class="card-header"> <%= job.job_no %> 
+                  </div>
                   <div class="card-body" style="cursor: pointer; min-height: 100px; min-width: 100px;  background-color: white;">
-                    <%= job.job_no %>
+                    <%= job.last_activity %>
                       <div class="btn btn-xs btn-danger cancel" aria-label="<%= job.id %>" style="float: right;">
                         X
                       </div>
@@ -82,7 +133,7 @@
   </div>
   <form method="post" action="/user_jobs/save_assignment">
     <input type="hidden" name="_csrf_token" value="<%= Phoenix.Controller.get_csrf_token %>">
-    <input type="text" name="map_job">
+    <input type="hidden" name="map_job">
     <button class="btn btn-xl btn-success" style="position: fixed; bottom: 5%; right: 5%;"><em class="fa fa-save"></em> Save Assignment</button>
 
   </form>
@@ -120,7 +171,6 @@
     $(document).on("click", ".cancel", function() {
       var user_id = $(this).parent().parent().parent().parent().attr("aria-label")
       var job_id = $(this).attr("aria-label")
-    
       var val = $("input[name='map_job']").val();
       var finalVal;
       if (val != "") {

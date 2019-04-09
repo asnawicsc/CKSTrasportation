@@ -17,6 +17,7 @@ defmodule Transporter.Settings do
       [%User{}, ...]
 
   """
+
   def list_users do
     Repo.all(User)
   end

@@ -28,7 +28,7 @@ defmodule TransporterWeb do
       alias Transporter.Settings
       alias Transporter.Settings.User
       alias Transporter.Logistic
-      alias Transporter.Logistic.{Activity, Job}
+      alias Transporter.Logistic.{Activity, Job, UserJob}
     end
   end
 

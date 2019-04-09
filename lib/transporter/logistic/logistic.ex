@@ -2,6 +2,7 @@ defmodule Transporter.Logistic do
   @moduledoc """
   The Logistic context.
   """
+  require IEx
   import Mogrify
   import Ecto.Query, warn: false
   alias Transporter.Repo
@@ -145,10 +146,32 @@ defmodule Transporter.Logistic do
       {:error, %Ecto.Changeset{}}
 
   """
-  def create_activity(attrs \\ %{}) do
-    %Activity{}
-    |> Activity.changeset(attrs)
-    |> Repo.insert()
+  def create_activity(attrs \\ %{}, job \\ nil, user \\ nil) do
+    a =
+      %Activity{}
+      |> Activity.changeset(attrs)
+      |> Repo.insert()
+
+    if job != nil do
+      name =
+        if user != nil do
+          user.username
+        else
+          b = Repo.all(Transporter.Settings.User) |> List.first()
+          b.username
+        end
+
+      attrs =
+        if Map.keys(attrs) |> List.first() |> is_atom() do
+          attrs
+        else
+          for {key, val} <- attrs, into: %{}, do: {String.to_atom(key), val}
+        end
+
+      c = Job.changeset(job, %{last_activity: attrs.message, last_by: name}) |> Repo.update()
+    end
+
+    a
   end
 
   @doc """
@@ -337,6 +360,30 @@ defmodule Transporter.Logistic do
   """
   def list_user_jobs do
     Repo.all(UserJob)
+  end
+
+  def list_user_jobs(user_id) do
+    a =
+      Repo.all(
+        from(
+          u in UserJob,
+          left_join: j in Job,
+          on: j.id == u.job_id,
+          where: u.user_id == ^user_id,
+          select: %{
+            status: u.status,
+            last_activity: j.last_activity,
+            last_updated: j.updated_at,
+            description: j.description,
+            job_no: j.job_no,
+            id: j.id
+          }
+        )
+      )
+
+    IO.inspect(a)
+
+    a
   end
 
   @doc """

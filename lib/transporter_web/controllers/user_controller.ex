@@ -1,5 +1,6 @@
 defmodule TransporterWeb.UserController do
   use TransporterWeb, :controller
+  require IEx
 
   def index(conn, params) do
     users = Settings.list_users()
@@ -10,8 +11,11 @@ defmodule TransporterWeb.UserController do
       else
         users
       end
+      |> Enum.map(fn x -> Map.put(x, :jobs, Logistic.list_user_jobs(x.id)) end)
 
     jobs = Logistic.list_jobs()
+
+    # need to show the list of user jobs....
 
     render(conn, "index.html", users: users, jobs: jobs)
   end

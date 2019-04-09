@@ -8,13 +8,26 @@ defmodule TransporterWeb.UserJobController do
   def save_assignment(conn, params) do
     map_job = params["map_job"] |> Poison.decode!() |> Enum.uniq()
 
-    for job <- map_job do
-      us = Repo.get_by(Logistic.UserJob, job_id: job["job_id"], user_id: job["user_id"])
+    for jobq <- map_job do
+      us = Repo.get_by(Logistic.UserJob, job_id: jobq["job_id"], user_id: jobq["user_id"])
 
       if us == nil do
-        job = Map.put(job, "status", "pending accept")
-        a = Logistic.create_user_job(job)
-        IO.inspect(a)
+        jobq = Map.put(jobq, "status", "pending accept")
+        {:ok, usj} = Logistic.create_user_job(jobq)
+
+        user = Repo.get(User, usj.user_id)
+
+        {:ok, act} =
+          Logistic.create_activity(
+            %{
+              created_by: conn.private.plug_session["user_name"],
+              created_id: usj.user_id,
+              job_id: usj.job_id,
+              message: "Assigned to #{user.username}. Pending accept from #{user.user_level}."
+            },
+            Repo.get(Job, usj.job_id),
+            Repo.get(User, conn.private.plug_session["user_id"])
+          )
       end
     end
 
