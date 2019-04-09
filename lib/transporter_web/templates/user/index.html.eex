@@ -20,13 +20,14 @@
                   <h2>
                     <%= user.username %>
                   </h2>
-                  <span><%= link "Show", to: user_path(@conn, :show, user), class: "btn btn-default btn-xs" %></span>
-                  <span><%= link "Edit", to: user_path(@conn, :edit, user), class: "btn btn-default btn-xs" %></span>
-                  <span><% link "Delete", to: user_path(@conn, :delete, user), method: :delete, data: [confirm: "Are you sure?"], class: "btn btn-danger btn-xs" %></span>
+                  <%= user.user_level %>
+                    <span><%= link "Show", to: user_path(@conn, :show, user), class: "btn btn-default btn-xs" %></span>
+                    <span><%= link "Edit", to: user_path(@conn, :edit, user), class: "btn btn-default btn-xs" %></span>
+                    <span><% link "Delete", to: user_path(@conn, :delete, user), method: :delete, data: [confirm: "Are you sure?"], class: "btn btn-danger btn-xs" %></span>
                 </td>
 
                 <td>
-                  <div class="row sortable" style="min-height: 140px;  background-color: #65656533; padding: 10px; ">
+                  <div class="row sortable" aria-label="<%= user.id %>" style="min-height: 140px;  background-color: #65656533; padding: 10px; ">
 
                   </div>
                 </td>
@@ -59,7 +60,7 @@
                 <div class="card card-default">
                   <div class="card-body" style="cursor: pointer; min-height: 100px; min-width: 100px;  background-color: white;">
                     <%= job.job_no %>
-                      <div class="btn btn-xs btn-danger cancel" style="float: right;">
+                      <div class="btn btn-xs btn-danger cancel" aria-label="<%= job.id %>" style="float: right;">
                         X
                       </div>
 
@@ -79,40 +80,62 @@
       </tbody>
     </table>
   </div>
-</div>
+  <form method="post" action="/user_jobs/save_assignment">
+    <input type="hidden" name="_csrf_token" value="<%= Phoenix.Controller.get_csrf_token %>">
+    <input type="text" name="map_job">
+    <button class="btn btn-xl btn-success" style="position: fixed; bottom: 5%; right: 5%;"><em class="fa fa-save"></em> Save Assignment</button>
 
+  </form>
+
+</div>
 
 <script type="text/javascript">
   $(document).ready(function() {
-
-    
-   
-    $(".draggable").draggable({
-  
-      
-      revert: "invalid"
-    });
-
-$(".sortable").droppable({
-           drop: function( event, ui ) {
-         console.log(ui.helper[0].attributes["aria-label"].value);   
-var id = ui.helper[0].attributes["aria-label"].value
-
-$("#myModalSmall").find("modal-title").html("Assign this job?");
-$("#myModalSmall").find("btn-secondary").attr("aria-label", id)
-$("#myModalSmall").modal();
-
-$("#myModalSmall").on("click", ".btn-secondary", function(){
-
-$(this).attr("aria-label", id)
-console.log(this);
-});
-
-
-
+    $(".sortable").sortable({
+      receive: function(event, ui) {
+        var user_id = event.target.attributes["aria-label"].value
+        var job_id = ui.item[0].attributes["aria-label"].value
+        var map = {
+          "user_id": user_id,
+          "job_id": job_id
+        };
+        var val = $("input[name='map_job']").val();
+        var finalVal;
+        if (val != "") {
+          finalVal = JSON.parse(val);
+        }
+        var list = [];
+        for (var i in finalVal) {
+          list.push(finalVal[i]);
+        }
+        list.push(map);
+        var val = $("input[name='map_job']").val(JSON.stringify(list));
       }
     });
+    $(".draggable").draggable({
+      connectToSortable: ".sortable",
+      helper: "clone",
+      revert: "invalid"
+    });
     $(document).on("click", ".cancel", function() {
+      var user_id = $(this).parent().parent().parent().parent().attr("aria-label")
+      var job_id = $(this).attr("aria-label")
+    
+      var val = $("input[name='map_job']").val();
+      var finalVal;
+      if (val != "") {
+        finalVal = JSON.parse(val);
+      }
+      var list = [];
+      for (var i in finalVal) {
+        list.push(finalVal[i]);
+      }
+      for (var i = 0; i < list.length; i++) {
+        if (list[i].user_id === user_id && list[i].job_id === job_id) {
+          list.splice(i, 1);
+        }
+      }
+      var val = $("input[name='map_job']").val(JSON.stringify(list));
       $(this).parent().parent().parent().remove()
     })
   })
