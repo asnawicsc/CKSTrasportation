@@ -1,48 +1,153 @@
 <h2>Show Job</h2>
+<div class="row">
+  <div class="col-lg-4">
+    <ul>
 
-<ul>
+      <li>
+        <strong>Job no:</strong>
+        <%= @job.job_no %>
+      </li>
 
-  <li>
-    <strong>Job no:</strong>
-    <%= @job.job_no %>
-  </li>
+      <li>
+        <strong>Description:</strong>
+        <%= @job.description %>
+      </li>
 
-  <li>
-    <strong>Description:</strong>
-    <%= @job.description %>
-  </li>
+      <li>
+        <strong>Created by:</strong>
+        <%= @job.created_by %>
+      </li>
 
-  <li>
-    <strong>Created by:</strong>
-    <%= @job.created_by %>
-  </li>
+      <li>
+        <strong>Last activity:</strong>
+        <%= @job.last_activity %>
+      </li>
 
-  <li>
-    <strong>Last activity:</strong>
-    <%= @job.last_activity %>
-  </li>
+      <li>
+        <strong>Last by:</strong>
+        <%= @job.last_by %>
+      </li>
 
-  <li>
-    <strong>Last by:</strong>
-    <%= @job.last_by %>
-  </li>
+      <li>
+        <strong>Last Updated:</strong>
+        <%= @job.updated_at |> Timex.shift(hours: 8) |> Timex.format!( "%Y-%m-%d %I:%M %P", :strftime) %>
+      </li>
 
-  <li>
-    <strong>Last Updated:</strong>
-    <%= @job.updated_at |> Timex.shift(hours: 8) |> Timex.format!( "%Y-%m-%d %I:%M %P", :strftime) %>
-  </li>
+      <li>
+        <strong>Duration:</strong>
+        <%= @job.duration %>
+      </li>
 
-  <li>
-    <strong>Duration:</strong>
-    <%= @job.duration %>
-  </li>
+      <li>
+        <strong>Inserted:</strong>
+        <%= @job.inserted_at |> Timex.shift(hours: 8) |> Timex.format!( "%Y-%m-%d %I:%M %P", :strftime) %>
+      </li>
 
-  <li>
-    <strong>Inserted:</strong>
-    <%= @job.inserted_at |> Timex.shift(hours: 8) |> Timex.format!( "%Y-%m-%d %I:%M %P", :strftime) %>
-  </li>
+    </ul>
 
-</ul>
+    <span><%= link "Edit", to: job_path(@conn, :edit, @job) %></span>
+    <span><%= link "Back", to: job_path(@conn, :index) %></span>
 
-<span><%= link "Edit", to: job_path(@conn, :edit, @job) %></span>
-<span><%= link "Back", to: job_path(@conn, :index) %></span>
+  </div>
+  <div class="col-lg-6" style="height: 700px; overflow-y: scroll;">
+
+    <% dates = @activities |> Map.keys %>
+      <ul class="timeline">
+        <% require Integer %>
+          <%= for date <- dates do %>
+
+            <li class="timeline-separator" data-datetime="<%= date %>"></li>
+
+            <%= for act <- @activities[date] do %>
+
+              <%= if Integer.is_odd(act.id) do %>
+
+                <!-- START timeline item-->
+                <li>
+                  <%= cond do %>
+
+                  <% act.message |> String.split(" ") |> List.first == "Pending" -> %>
+                  <div class="timeline-badge warning"><em class="fa fa-clock"></em></div>
+                  
+                  <% act.message |> String.split(" ") |> List.first == "Accepted" -> %>
+                  <div class="timeline-badge success"><em class="fa fa-clipboard-check"></em></div>
+                  
+                  <% act.message |> String.split(" ") |> List.first == "Assigned" -> %>
+                  <div class="timeline-badge info"><em class="fa fa-check-circle"></em></div>
+
+                  <% true -> %>
+                  <div class="timeline-badge primary"><em class="fa fa-users"></em></div>
+                  <% end %>
+                  <div class="timeline-card">
+                    <div class="popover left">
+                      <h4 class="popover-header">
+                        <%= act.created_by %>
+                      </h4>
+                      <div class="arrow"></div>
+                      <div class="popover-body">
+                        <%= act.message %>
+                          <br>
+                          <%= if File.exists?(File.cwd!() <> "/media/#{act.id}")  do %>
+
+                            <img class="circle thumb64" src="/images/uploads/<%= act.img_url %>">
+                            <% end %>
+                              <p class="small">
+
+                                <%= act.inserted_at %>
+                              </p>
+                      </div>
+                    </div>
+                  </div>
+                </li>
+                <!-- END timeline item-->
+                <% else %>
+                  <!-- START timeline item-->
+                  <li class="timeline-inverted">
+                    <%= cond do %>
+
+                  <% act.message |> String.split(" ") |> List.first == "Pending" -> %>
+                  <div class="timeline-badge warning"><em class="fa fa-clock"></em></div>
+                  
+                  <% act.message |> String.split(" ") |> List.first == "Accepted" -> %>
+                  <div class="timeline-badge success"><em class="fa fa-clipboard-check"></em></div>
+                  
+                  <% act.message |> String.split(" ") |> List.first == "Assigned" -> %>
+                  <div class="timeline-badge info"><em class="fa fa-check-circle"></em></div>
+
+                  <% true -> %>
+                  <div class="timeline-badge primary"><em class="fa fa-users"></em></div>
+                  <% end %>
+                    <div class="timeline-card">
+                      <div class="popover right">
+                        <h4 class="popover-header">
+                          <%= act.created_by %>
+                        </h4>
+                        <div class="arrow"></div>
+                        <div class="popover-body">
+                          <%= act.message %>
+                            <br>
+                            <%= if File.exists?(File.cwd!() <> "/media/#{act.id}")  do %>
+
+                              <img class="circle thumb64" src="/images/uploads/<%= act.img_url %>">
+                              <% end %>
+                                <p class="small">
+
+                                  <%= act.inserted_at %>
+                                </p>
+                        </div>
+                      </div>
+                    </div>
+                  </li>
+                  <!-- END timeline item-->
+                  <% end %>
+                    <% end %>
+
+                      <% end %>
+
+                        <!-- START timeline separator-->
+                        <li class="timeline-separator" data-datetime="End"></li>
+                        <!-- END timeline separator-->
+
+      </ul>
+  </div>
+</div>

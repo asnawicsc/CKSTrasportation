@@ -3,30 +3,35 @@
 <table class="table">
   <thead>
     <tr>
-      <th>Job</th>
+      <th>Job No</th>
       <th>Created by</th>
-      <th>Created</th>
       <th>Message</th>
       <th>Location</th>
       <th>Fee</th>
-
+      <th>At</th>
       <th></th>
     </tr>
   </thead>
   <tbody>
 <%= for activity <- @activities do %>
     <tr>
-      <td><%= activity.job_id %></td>
+      <td><%= activity.job_no %></td>
       <td><%= activity.created_by %></td>
-      <td><%= activity.created_id %></td>
-      <td><%= activity.message %></td>
+      <td>
+        <%= activity.message %>
+        
+<%= if File.exists?(File.cwd!() <> "/media/#{activity.id}")  do %>
+  
+<img class="circle thumb64" src="/images/uploads/<%= activity.img_url %>">
+<% end %>
+      </td>
       <td><%= activity.location %></td>
       <td><%= activity.fee %></td>
-
+      <td><%= activity.inserted_at |> Timex.shift(hours: 8) |> Timex.format!( "%Y-%m-%d %I:%M %P", :strftime) %></td>
       <td class="text-right">
-        <span><%= link "Show", to: activity_path(@conn, :show, activity), class: "btn btn-default btn-xs" %></span>
-        <span><%= link "Edit", to: activity_path(@conn, :edit, activity), class: "btn btn-default btn-xs" %></span>
-        <span><%= link "Delete", to: activity_path(@conn, :delete, activity), method: :delete, data: [confirm: "Are you sure?"], class: "btn btn-danger btn-xs" %></span>
+        <span><%= link "Show", to: activity_path(@conn, :show, activity.id), class: "btn btn-default btn-xs" %></span>
+        <span><%= link "Edit", to: activity_path(@conn, :edit, activity.id), class: "btn btn-default btn-xs" %></span>
+        <span><%= link "Delete", to: activity_path(@conn, :delete, activity.id), method: :delete, data: [confirm: "Are you sure?"], class: "btn btn-danger btn-xs" %></span>
       </td>
     </tr>
 <% end %>

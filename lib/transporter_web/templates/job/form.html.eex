@@ -17,6 +17,13 @@
     <%= error_tag f, :description %>
   </div>
 
+
+   <div class="form-group">
+    <%= label f, :last_activity, class: "control-label" %>
+    <%= text_input f, :last_activity, class: "form-control" %>
+    <%= error_tag f, :last_activity %>
+  </div>
+
   <div class="form-group">
   <%= label f, :job_type, class: "control-label" %>
   <%= select f, :job_type, [ {"Import", "Import"}, {"Export", "Export"}, {"Local Transport", "Local Transport"}], class: "form-control" %>

@@ -30,54 +30,67 @@
                   <div class="row sortable" aria-label="<%= user.id %>" style="min-height: 140px;  background-color: #65656533; padding: 10px; ">
                     <%= for job <- user.jobs do %>
 
-
-                        <%= if job.last_activity != nil do %>
-                          <% who = job.last_activity |> String.split(" ") |> List.last |> String.replace(".", "") %>
+                      <%= if job.last_activity != nil do %>
+                        <% who = job.last_activity |> String.split(" ") |> List.last |> String.replace(".", "") %>
 
                           <%= if who == user.user_level do %>
 
-                                  <div class="col-sm-3">
-                        <div class="card card-default">
-                          <div class="card-header">
-                            <%= job.job_no %>
-                          </div>
-                          <div class="card-body" style="cursor: pointer; min-height: 100px; min-width: 100px;  background-color: white;">
-                            <%= job.last_activity %>
-                            <%= if job.last_activity != nil do %>
-                              <% who = job.last_activity |> String.split(" ") |> List.last |> String.replace(".", "") %>
+                            <div class="col-sm-3">
+                              <div class="card card-default">
+                                <div class="card-header">
+                                  <%= job.job_no %>
+                                </div>
+                                <div class="card-body" style="cursor: pointer; min-height: 100px; min-width: 100px;  background-color: white;">
+                                  <%= job.last_activity %>
+                                    <%= if job.last_activity != nil do %>
+                                      <% who = job.last_activity |> String.split(" ") |> List.last |> String.replace(".", "") %>
 
-                              <%= if who == user.user_level do %>
+                                        <%= if who == user.user_level do %>
+                                          <%= if job.last_activity |> String.split(" ")  |> Enum.reverse |> Enum.take(5) |> Enum.reverse |> Enum.take(3) |> Enum.join(" ") == "Pending pickup container" do  %>
 
-                                <form method="post" action="/activities/">
-                                  <input type="hidden" name="_csrf_token" value="<%= Phoenix.Controller.get_csrf_token %>">
-                                  <input type="hidden" name="activity[job_id]" value="<%= job.id %>">
-                  
-                                  <input type="hidden" name="activity[message]" value="accepted job <%= job.job_no %>.">
-                                  <button class="btn btn-xs btn-warning">Accept Job</button>
-                                </form>
-                                <% end %>
-                              <% end %>
-                          </div>
-                          <% seconds = DateTime.diff(Timex.now, DateTime.from_naive!(job.last_updated, "Etc/UTC"), 1) %>
+                                            <form method="post" action="/activities/" enctype="multipart/form-data">
+                                              <input type="hidden" name="_csrf_token" value="<%= Phoenix.Controller.get_csrf_token %>">
+                                              <input type="hidden" name="activity[job_id]" value="<%= job.id %>">
+                                              <input type="text" name="activity[location]" class="form-control">
+                                              <center>
 
-                            <div class="card-footer" style="font-size: 12px;">Updated<br>
-                              <%= Timex.Duration.from_seconds(seconds) |> Timex.format_duration( :humanized) |> String.split(",") |> hd() %> ago</div>
+                                                <img class="preview" id="<%= job.id %>" alt="Click here to upload picture" style='width: 80%; ' src='data:image/png;base64, '>
+                                                <input class="imgInp" id="<%= job.id %>" name="activity[image]" type="file" style="display: none;" required="required">
 
-                        </div>
+                                              </center>
+                                              <input type="hidden" name="activity[message]" value="has pickup container for <%= job.job_no %>">
+                                              <button class="btn btn-xs btn-warning"><em class="fa fa-truck-loading"></em> Pickup<br>Trailer</button>
+                                            </form>
+                                            <% else %>
+                                              <form method="post" action="/activities/">
+                                                <input type="hidden" name="_csrf_token" value="<%= Phoenix.Controller.get_csrf_token %>">
+                                                <input type="hidden" name="activity[job_id]" value="<%= job.id %>">
+                                                <%= if user.user_level == "LorryDriver" do %>
+                                                  <input type="hidden" name="activity[message]" value="Accepted by <%= user.username %>. Pending pickup container from <%= user.user_level%>.">
+                                                  <% else %>
 
-                      </div>
+                                                    <input type="hidden" name="activity[message]" value="accepted job <%= job.job_no %>.">
+                                                    <% end %>
+                                                      <button class="btn btn-xs btn-warning">Accept Job</button>
+                                              </form>
+                                              <% end %>
+                                                <% end %>
+                                                  <% end %>
+                                </div>
+                                <% seconds = DateTime.diff(Timex.now, DateTime.from_naive!(job.last_updated, "Etc/UTC"), 1) %>
+
+                                  <div class="card-footer" style="font-size: 12px;">Updated<br>
+                                    <%= Timex.Duration.from_seconds(seconds) |> Timex.format_duration( :humanized) |> String.split(",") |> hd() %> ago</div>
+
+                              </div>
+
+                            </div>
                             <% else %>
-                           <% end %>
+                              <% end %>
 
-                        <% end %>
+                                <% end %>
 
-
-
-                   
-
-                     
-
-                      <% end %>
+                                  <% end %>
                   </div>
                 </td>
 
@@ -107,7 +120,8 @@
             <td>
               <div class="col-sm-3 draggable" aria-label="<%= job.id %>" style="min-width: 200px;">
                 <div class="card card-default">
-                  <div class="card-header"> <%= job.job_no %> 
+                  <div class="card-header">
+                    <%= job.job_no %>
                   </div>
                   <div class="card-body" style="cursor: pointer; min-height: 100px; min-width: 100px;  background-color: white;">
                     <%= job.last_activity %>
@@ -131,17 +145,84 @@
       </tbody>
     </table>
   </div>
-  <form method="post" action="/user_jobs/save_assignment">
-    <input type="hidden" name="_csrf_token" value="<%= Phoenix.Controller.get_csrf_token %>">
-    <input type="hidden" name="map_job">
-    <button class="btn btn-xl btn-success" style="position: fixed; bottom: 5%; right: 5%;"><em class="fa fa-save"></em> Save Assignment</button>
 
-  </form>
+  <div style="position: fixed; bottom: 5%; right: 5%; display: inline-flex;">
+
+    <form method="post" action="/user_jobs/save_assignment">
+      <input type="hidden" name="_csrf_token" value="<%= Phoenix.Controller.get_csrf_token %>">
+      <input type="hidden" name="map_job">
+      <button class="btn btn-xl btn-success"><em class="fa fa-save"></em> Save Assignment</button>
+
+    </form>
+    <div class="btn btn-info" aria-label="report">
+      <em class="fa fa-truck-loading"></em> Report<br>Trailer
+    </div>
+    <form id="report" method="post" action="/activities/" enctype="multipart/form-data" style="display: none;">
+      <input type="hidden" name="_csrf_token" value="<%= Phoenix.Controller.get_csrf_token %>">
+     
+      <select name="activity[job_id]">
+        <%= for job <- @jobs do %>
+ <option  value="<%= job.id %>"><%= job.job_no %></option>
+        <% end %>
+      </select>
+      <center>
+
+        <img class="preview" id="adhoc" alt="Click here to upload picture" style='width: 200px; ' src='data:image/png;base64, '>
+        <input class="imgInp" id="adhoc" name="activity[image]" type="file" style="display: none;"  required="required">
+
+      </center>
+      <input type="hidden" name="activity[message]" value="arrived destination.">
+      <input type="text" name="activity[location]" >
+
+      <button class="btn btn-md btn-warning"><em class="fa fa-truck-loading"></em> Report Trailer</button>
+    </form>
+
+  </div>
 
 </div>
 
 <script type="text/javascript">
   $(document).ready(function() {
+    $("div[aria-label='report']").click(function() {
+      var form = $("form#report").clone();
+      form.attr("id", "report2")
+      form.find("#adhoc.preview").attr("id", "adhoc2");
+      form.find("#adhoc.imgInp").attr("id", "adhoc2");
+      var bt = form.find("button").clone();
+      form.find("button").hide();
+      form.attr("style", "");
+      $("#myModalSmall").find(".modal-title").html("Report Trailer");
+      $("#myModalSmall").find(".modal-body").html("");
+      $("#myModalSmall").find(".modal-body").html(form);
+      var bb = '<button class="btn btn-secondary" type="button" data-dismiss="modal">Close</button>';
+      $("#myModalSmall").find(".modal-footer").html("");
+      $("#myModalSmall").find(".modal-footer").append(bb);
+      $("#myModalSmall").find(".modal-footer").append(bt);
+      bt.click(function() {
+        form.submit();
+      })
+      $(document).imageInput();
+      $("#myModalSmall").modal();
+    });
+    (function($) {
+      $.fn.imageInput = function() {
+        $("input.imgInp").change(function() {
+          var id = $(this).attr("id");
+          var reader = new FileReader();
+          reader.onload = function(e) {
+            $('img#' + id + '.preview').attr('src', e.target.result);
+          }
+          reader.readAsDataURL($('input#' + id + '.imgInp')[0].files[0]);
+        });
+        $("img.preview").click(function() {
+          var id2 = $(this).attr("id");
+          $("input#" + id2 + ".imgInp").click()
+        })
+      };
+    })(jQuery);
+    $(window).ready(function() {
+      $(document).imageInput();
+    });
     $(".sortable").sortable({
       receive: function(event, ui) {
         var user_id = event.target.attributes["aria-label"].value

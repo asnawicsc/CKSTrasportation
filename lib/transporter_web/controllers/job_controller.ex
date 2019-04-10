@@ -3,6 +3,7 @@ defmodule TransporterWeb.JobController do
 
   alias Transporter.Logistic
   alias Transporter.Logistic.Job
+  require IEx
 
   def index(conn, _params) do
     jobs = Logistic.list_jobs()
@@ -51,9 +52,30 @@ defmodule TransporterWeb.JobController do
     end
   end
 
+  def map_image(activity_id) do
+    a = Repo.get_by(Transporter.Logistic.Image, activity_id: activity_id)
+
+    if a != nil do
+      a.filename
+    else
+      ""
+    end
+  end
+
   def show(conn, %{"id" => id}) do
     job = Logistic.get_job!(id)
-    render(conn, "show.html", job: job)
+
+    activities =
+      Logistic.list_activities(job.id)
+      |> Enum.map(fn x -> Map.put(x, :img_url, map_image(x.id)) end)
+      |> Enum.map(fn x -> Map.put(x, :date, format_date(x.inserted_at)) end)
+      |> Enum.group_by(fn x -> x.date end)
+
+    render(conn, "show.html", job: job, activities: activities)
+  end
+
+  def format_date(inserted_at) do
+    "#{inserted_at.day}-#{inserted_at.month}-#{inserted_at.year}"
   end
 
   def edit(conn, %{"id" => id}) do

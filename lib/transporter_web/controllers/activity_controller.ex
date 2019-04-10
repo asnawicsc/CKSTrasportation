@@ -6,8 +6,20 @@ defmodule TransporterWeb.ActivityController do
   require IEx
 
   def index(conn, _params) do
-    activities = Logistic.list_activities()
+    activities =
+      Logistic.list_activities() |> Enum.map(fn x -> Map.put(x, :img_url, map_image(x.id)) end)
+
     render(conn, "index.html", activities: activities)
+  end
+
+  def map_image(activity_id) do
+    a = Repo.get_by(Transporter.Logistic.Image, activity_id: activity_id)
+
+    if a != nil do
+      a.filename
+    else
+      ""
+    end
   end
 
   def new(conn, _params) do
@@ -21,7 +33,16 @@ defmodule TransporterWeb.ActivityController do
     activity_params = Map.put(activity_params, "created_id", user.id)
 
     activity_params =
-      Map.put(activity_params, "message", "#{user.username} #{activity_params["message"]}")
+      if user.user_level == "LorryDriver" && activity_params["image"] == nil do
+        Map.put(
+          activity_params,
+          "message",
+          "#{activity_params["message"]}"
+        )
+      else
+        activity_params =
+          Map.put(activity_params, "message", "#{user.username} #{activity_params["message"]}")
+      end
 
     job = Repo.get(Job, activity_params["job_id"])
 
@@ -29,9 +50,22 @@ defmodule TransporterWeb.ActivityController do
       job.last_activity |> String.split(" ") |> List.pop_at(2) |> elem(0)
       |> String.replace(".", "")
 
+    # IEx.pry()
+
     if user.username == assigned do
       case Logistic.create_activity(activity_params, job) do
         {:ok, activity} ->
+          if user.user_level == "LorryDriver" && activity_params["image"] != nil do
+            map = Logistic.image_upload(activity_params["image"], activity.id)
+
+            a =
+              Logistic.create_image(%{
+                activity_id: activity.id,
+                filename: map.filename,
+                thumbnail: map.bin
+              })
+          end
+
           conn
           |> put_flash(:info, "Activity updated successfully.")
           |> redirect(to: user_path(conn, :index))
@@ -40,9 +74,33 @@ defmodule TransporterWeb.ActivityController do
           render(conn, "new.html", changeset: changeset)
       end
     else
-      conn
-      |> put_flash(:error, "Wasnt assigned to you.")
-      |> redirect(to: user_path(conn, :index))
+      if user.user_level == "LorryDriver" &&
+           job.last_activity |> String.split(" ") |> List.pop_at(2) |> elem(0) == "pickup" do
+        case Logistic.create_activity(activity_params, job) do
+          {:ok, activity} ->
+            if user.user_level == "LorryDriver" && activity_params["image"] != nil do
+              map = Logistic.image_upload(activity_params["image"], activity.id)
+            end
+
+            a =
+              Logistic.create_image(%{
+                activity_id: activity.id,
+                filename: map.filename,
+                thumbnail: map.bin
+              })
+
+            conn
+            |> put_flash(:info, "Activity updated successfully.")
+            |> redirect(to: user_path(conn, :index))
+
+          {:error, %Ecto.Changeset{} = changeset} ->
+            render(conn, "new.html", changeset: changeset)
+        end
+      else
+        conn
+        |> put_flash(:error, "Wasnt assigned to you.")
+        |> redirect(to: user_path(conn, :index))
+      end
     end
   end
 

@@ -28,6 +28,22 @@ defmodule TransporterWeb.UserJobController do
             Repo.get(Job, usj.job_id),
             Repo.get(User, conn.private.plug_session["user_id"])
           )
+      else
+        user = Repo.get(User, us.user_id)
+
+        if user.user_level == "LorryDriver" do
+          {:ok, act} =
+            Logistic.create_activity(
+              %{
+                created_by: conn.private.plug_session["user_name"],
+                created_id: us.user_id,
+                job_id: us.job_id,
+                message: "Assigned to #{user.username}. Pending accept from #{user.user_level}."
+              },
+              Repo.get(Job, us.job_id),
+              Repo.get(User, conn.private.plug_session["user_id"])
+            )
+        end
       end
     end
 

@@ -114,8 +114,46 @@ defmodule Transporter.Logistic do
       [%Activity{}, ...]
 
   """
-  def list_activities do
-    Repo.all(Activity)
+  def list_activities(job_id \\ nil) do
+    if job_id == nil do
+      Repo.all(
+        from(
+          a in Activity,
+          left_join: j in Job,
+          on: a.job_id == j.id,
+          select: %{
+            id: a.id,
+            job_id: j.id,
+            job_no: j.job_no,
+            created_by: a.created_by,
+            message: a.message,
+            location: a.location,
+            fee: a.fee,
+            inserted_at: a.inserted_at
+          }
+        )
+      )
+    else
+      Repo.all(
+        from(
+          a in Activity,
+          left_join: j in Job,
+          on: a.job_id == j.id,
+          where: a.job_id == ^job_id,
+          select: %{
+            id: a.id,
+            job_id: j.id,
+            job_no: j.job_no,
+            created_by: a.created_by,
+            message: a.message,
+            location: a.location,
+            fee: a.fee,
+            inserted_at: a.inserted_at
+          },
+          order_by: [a.inserted_at]
+        )
+      )
+    end
   end
 
   @doc """
@@ -318,19 +356,20 @@ defmodule Transporter.Logistic do
   end
 
   def image_upload(param, activity_id) do
-    path = File.cwd!() <> "/media"
-    image_path = Application.app_dir(:webpos, "priv/static/images")
+    path = File.cwd!() <> "/media/#{activity_id}"
+    image_path = Application.app_dir(:transporter, "priv/static/images")
 
     if File.exists?(path) == false do
-      File.mkdir(File.cwd!() <> "/media")
+      File.mkdir(File.cwd!() <> "/media/#{activity_id}")
     end
 
     fl = param.filename |> String.replace(" ", "_")
-    absolute_path = path <> "/#{activity_id}/#{fl}"
-    absolute_path_bin = path <> "/bin_" <> "#{activity_id}/#{fl}"
+    absolute_path = path <> "/#{fl}"
+    absolute_path_bin = path <> "/bin_" <> "#{fl}"
+
     File.cp(param.path, absolute_path)
-    File.rm(image_path <> "/uploads")
-    File.ln_s(path, image_path <> "/uploads")
+    File.rm(image_path <> "/uploads/#{activity_id}")
+    File.ln_s(path, image_path <> "/uploads/#{activity_id}")
 
     resized =
       Mogrify.open(absolute_path)
@@ -338,13 +377,13 @@ defmodule Transporter.Logistic do
       |> save(path: absolute_path_bin)
 
     File.cp(resized.path, absolute_path)
-    File.rm(image_path <> "/uploads")
-    File.ln_s(path, image_path <> "/uploads")
+    File.rm(image_path <> "/uploads/#{activity_id}")
+    File.ln_s(path, image_path <> "/uploads/#{activity_id}")
 
     {:ok, bin} = File.read(resized.path)
 
     File.rm(resized.path)
-    %{filename: "#{activity_id}/#{fl}", bin: bin}
+    %{filename: "/#{activity_id}/#{fl}", bin: bin}
   end
 
   alias Transporter.Logistic.UserJob
