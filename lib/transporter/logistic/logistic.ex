@@ -18,6 +18,17 @@ defmodule Transporter.Logistic do
       [%Job{}, ...]
 
   """
+
+  def get_geolocation() do
+    url =
+      "https://www.googleapis.com/geolocation/v1/geolocate?key=AIzaSyAw002sv9jlGumHGfjOGSqCUtAzJo-ypPg"
+
+    HTTPoison.post!(url, Poison.encode!(%{considerIp: false}), [
+      {"Content-Type", "application/json"}
+    ]).body
+    |> Poison.decode!()
+  end
+
   def list_jobs do
     Repo.all(Job)
   end
