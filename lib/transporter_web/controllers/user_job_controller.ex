@@ -28,6 +28,19 @@ defmodule TransporterWeb.UserJobController do
             Repo.get(Job, usj.job_id),
             Repo.get(User, conn.private.plug_session["user_id"])
           )
+
+        topic = "location:#{user.username}"
+        event = "new_request"
+
+        j = Repo.get(Job, usj.job_id)
+
+        message = %{
+          job_no: j.job_no,
+          description: j.description,
+          insertedAt: Timex.now() |> DateTime.to_unix(:millisecond)
+        }
+
+        TransporterWeb.Endpoint.broadcast(topic, event, message)
       else
         user = Repo.get(User, us.user_id)
 
@@ -43,6 +56,19 @@ defmodule TransporterWeb.UserJobController do
               Repo.get(Job, us.job_id),
               Repo.get(User, conn.private.plug_session["user_id"])
             )
+
+          topic = "location:#{user.username}"
+          event = "new_request"
+
+          j = Repo.get(Job, us.job_id)
+
+          message = %{
+            job_no: j.job_no,
+            description: j.description,
+            insertedAt: Timex.now() |> DateTime.to_unix(:millisecond)
+          }
+
+          TransporterWeb.Endpoint.broadcast(topic, event, message)
         end
       end
     end
