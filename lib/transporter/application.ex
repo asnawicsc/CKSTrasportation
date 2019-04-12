@@ -11,7 +11,7 @@ defmodule Transporter.Application do
       # Start the Ecto repository
       supervisor(Transporter.Repo, []),
       # Start the endpoint when the application starts
-      supervisor(TransporterWeb.Endpoint, []),
+      supervisor(TransporterWeb.Endpoint, [])
       # Start your own worker by calling: Transporter.Worker.start_link(arg1, arg2, arg3)
       # worker(Transporter.Worker, [arg1, arg2, arg3]),
     ]

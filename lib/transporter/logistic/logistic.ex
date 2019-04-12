@@ -19,11 +19,11 @@ defmodule Transporter.Logistic do
 
   """
 
-  def get_geolocation() do
+  def get_geolocation(considerIp) do
     url =
       "https://www.googleapis.com/geolocation/v1/geolocate?key=AIzaSyAw002sv9jlGumHGfjOGSqCUtAzJo-ypPg"
 
-    HTTPoison.post!(url, Poison.encode!(%{considerIp: false}), [
+    HTTPoison.post!(url, Poison.encode!(%{considerIp: considerIp}), [
       {"Content-Type", "application/json"}
     ]).body
     |> Poison.decode!()

@@ -31,7 +31,10 @@ defmodule TransporterWeb.Router do
   end
 
   # Other scopes may use custom stacks.
-  # scope "/api", TransporterWeb do
-  #   pipe_through :api
-  # end
+  scope "/api", TransporterWeb do
+    pipe_through(:api)
+
+    get("/webhook", PageController, :webhook_get)
+    post("/webhook", PageController, :webhook_post)
+  end
 end
