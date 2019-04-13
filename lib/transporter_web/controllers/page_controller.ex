@@ -22,17 +22,33 @@ defmodule TransporterWeb.PageController do
         job = Repo.get_by(Job, job_no: params["job_no"])
 
         {:ok, act} =
-          Logistic.create_activity(
-            %{
-              job_id: job.id,
-              created_by: user.username,
-              created_id: user.id,
-              message: "arrived destination.",
-              location: Poison.encode!(params["position"])
-            },
-            job,
-            user
-          )
+          if params["job_type"] == "arrive" do
+            Logistic.create_activity(
+              %{
+                job_id: job.id,
+                created_by: user.username,
+                created_id: user.id,
+                message: "#{user.username} arrived destination.",
+                location: Poison.encode!(params["position"])
+              },
+              job,
+              user
+            )
+          else
+            message = "has pickup container for #{job.job_no}"
+
+            Logistic.create_activity(
+              %{
+                job_id: job.id,
+                created_by: user.username,
+                created_id: user.id,
+                message: message,
+                location: Poison.encode!(params["position"])
+              },
+              job,
+              user
+            )
+          end
 
         map = Logistic.image_upload(params["photos"], act.id)
 
@@ -42,6 +58,23 @@ defmodule TransporterWeb.PageController do
             filename: map.filename,
             thumbnail: map.bin
           })
+
+      "acceptJob" ->
+        user = Repo.get_by(User, username: params["username"])
+        job = Repo.get_by(Job, job_no: params["job_no"])
+
+        {:ok, act} =
+          Logistic.create_activity(
+            %{
+              job_id: job.id,
+              created_by: user.username,
+              created_id: user.id,
+              message:
+                "Accepted by #{user.username}. Pending pickup container from #{user.user_level}."
+            },
+            job,
+            user
+          )
     end
 
     conn
