@@ -27,6 +27,10 @@
         <strong>Last by:</strong>
         <%= @job.last_by %>
       </li>
+      <li>
+        <strong>Containers:</strong>
+        <%= @job.containers %>
+      </li>
 
       <li>
         <strong>Last Updated:</strong>
@@ -58,9 +62,9 @@
 
             <li class="timeline-separator" data-datetime="<%= date %>"></li>
 
-            <%= for act <- @activities[date] do %>
-
-              <%= if Integer.is_odd(act.id) do %>
+            <%= for o <- @activities[date] |> Enum.sort_by(fn x -> DateTime.from_naive!(x.inserted_at, "Etc/UTC") |> DateTime.to_unix(:millisecond) end) |> Enum.with_index do %>
+              <% act = elem(o, 0) %>
+              <%= if Integer.is_even(elem(o, 1)) do %>
 
                 <!-- START timeline item-->
                 <li>

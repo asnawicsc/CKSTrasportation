@@ -43,6 +43,11 @@ defmodule TransporterWeb.JobController do
             true
         end
 
+        for name <- job_params["containers"] |> String.split(",") do
+          a = Logistic.create_container(%{job_id: job.id, job_no: job.job_no, name: name})
+          IO.inspect(a)
+        end
+
         conn
         |> put_flash(:info, "Job created successfully.")
         |> redirect(to: job_path(conn, :show, job))

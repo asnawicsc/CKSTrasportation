@@ -2,11 +2,10 @@ defmodule Transporter.Logistic.UserJob do
   use Ecto.Schema
   import Ecto.Changeset
 
-
   schema "user_jobs" do
-    field :job_id, :integer
-    field :status, :string
-    field :user_id, :integer
+    field(:job_id, :integer)
+    field(:status, :string, default: "pending")
+    field(:user_id, :integer)
 
     timestamps()
   end

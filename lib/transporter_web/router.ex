@@ -28,6 +28,7 @@ defmodule TransporterWeb.Router do
     # resources("/images", ImageController)
     resources("/user_jobs", UserJobController)
     post("/user_jobs/save_assignment", UserJobController, :save_assignment)
+    resources("/containers", ContainerController)
   end
 
   # Other scopes may use custom stacks.

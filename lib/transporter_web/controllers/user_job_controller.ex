@@ -37,7 +37,9 @@ defmodule TransporterWeb.UserJobController do
         message = %{
           job_no: j.job_no,
           description: j.description,
-          insertedAt: Timex.now() |> DateTime.to_unix(:millisecond)
+          insertedAt: Timex.now() |> DateTime.to_unix(:millisecond),
+          pendingContainers: j.containers,
+          completedContainers: ""
         }
 
         TransporterWeb.Endpoint.broadcast(topic, event, message)

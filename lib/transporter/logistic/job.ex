@@ -9,14 +9,22 @@ defmodule Transporter.Logistic.Job do
     field(:job_no, :string)
     field(:last_activity, :string)
     field(:last_by, :string)
-
+    field(:containers, :binary)
     timestamps()
   end
 
   @doc false
   def changeset(job, attrs) do
     job
-    |> cast(attrs, [:job_no, :description, :created_by, :last_activity, :last_by, :duration])
+    |> cast(attrs, [
+      :containers,
+      :job_no,
+      :description,
+      :created_by,
+      :last_activity,
+      :last_by,
+      :duration
+    ])
     |> validate_required([:job_no, :description, :created_by])
   end
 end
