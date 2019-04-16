@@ -1,0 +1,28 @@
+<h2>Listing Delivery location</h2>
+
+<table class="table">
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Zone</th>
+
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+<%= for delivery_location <- @delivery_location do %>
+    <tr>
+      <td><%= delivery_location.name %></td>
+      <td><%= delivery_location.zone %></td>
+
+      <td class="text-right">
+        <span><%= link "Show", to: delivery_location_path(@conn, :show, delivery_location), class: "btn btn-default btn-xs" %></span>
+        <span><%= link "Edit", to: delivery_location_path(@conn, :edit, delivery_location), class: "btn btn-default btn-xs" %></span>
+        <span><%= link "Delete", to: delivery_location_path(@conn, :delete, delivery_location), method: :delete, data: [confirm: "Are you sure?"], class: "btn btn-danger btn-xs" %></span>
+      </td>
+    </tr>
+<% end %>
+  </tbody>
+</table>
+
+<span><%= link "New Delivery location", to: delivery_location_path(@conn, :new) %></span>

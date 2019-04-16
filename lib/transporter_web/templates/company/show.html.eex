@@ -1,0 +1,48 @@
+<h2>Show Company</h2>
+
+<ul>
+
+  <li>
+    <strong>Name:</strong>
+    <%= @company.name %>
+  </li>
+
+  <li>
+    <strong>Address:</strong>
+    <%= @company.address %>
+  </li>
+
+  <li>
+    <strong>Gst:</strong>
+    <%= @company.gst %>
+  </li>
+
+  <li>
+    <strong>Phone:</strong>
+    <%= @company.phone %>
+  </li>
+
+  <li>
+    <strong>Mobile:</strong>
+    <%= @company.mobile %>
+  </li>
+
+  <li>
+    <strong>Fax:</strong>
+    <%= @company.fax %>
+  </li>
+
+  <li>
+    <strong>Contact:</strong>
+    <%= @company.contact %>
+  </li>
+
+  <li>
+    <strong>Person:</strong>
+    <%= @company.person %>
+  </li>
+
+</ul>
+
+<span><%= link "Edit", to: company_path(@conn, :edit, @company) %></span>
+<span><%= link "Back", to: company_path(@conn, :index) %></span>

@@ -26,9 +26,9 @@ defmodule TransporterWeb do
       alias Transporter.Repo
       import Ecto.Query
       alias Transporter.Settings
-      alias Transporter.Settings.User
+      alias Transporter.Settings.{User, DeliveryLocation}
       alias Transporter.Logistic
-      alias Transporter.Logistic.{Activity, Job, UserJob, Image}
+      alias Transporter.Logistic.{Activity, Job, UserJob, Image, Container}
     end
   end
 
@@ -47,9 +47,12 @@ defmodule TransporterWeb do
       import TransporterWeb.Router.Helpers
       import TransporterWeb.ErrorHelpers
       import TransporterWeb.Gettext
-
+      alias Transporter.Repo
+      import Ecto.Query
+      alias Transporter.Settings
+      alias Transporter.Settings.{User, DeliveryLocation}
       alias Transporter.Logistic
-      alias Transporter.Logistic.{Activity, Job}
+      alias Transporter.Logistic.{Activity, Job, UserJob, Image}
     end
   end
 

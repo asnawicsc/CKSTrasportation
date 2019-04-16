@@ -3,42 +3,127 @@
     <div class="alert alert-danger">
       <p>Oops, something went wrong! Please check the errors below.</p>
     </div>
-  <% end %>
+    <% end %>
+      <div class="row">
+        <div class="col-sm-3">
+          <div class="form-group">
+            <%= label f, :job_type, class: "control-label" %>
+              <%= select f, :job_type, [ {"Import", "Import"}, {"Export", "Export"}, {"Local Transport", "Local Transport"}], class: "form-control" %>
+                <%= error_tag f, :job_type %>
+          </div>
 
-  <div class="form-group">
-    <%= label f, :job_no, class: "control-label" %>
-    <%= text_input f, :job_no, class: "form-control" %>
-    <%= error_tag f, :job_no %>
-  </div>
+          <div class="form-group">
+            <%= label f, :job_no, class: "control-label" %>
+              <%= text_input f, :job_no, class: "form-control" %>
+                <%= error_tag f, :job_no %>
+          </div>
+        </div>
+        <div class="col-sm-3">
 
-  <div class="form-group">
-    <%= label f, :description, class: "control-label" %>
-    <%= text_input f, :description, class: "form-control" %>
-    <%= error_tag f, :description %>
-  </div>
+          <div class="form-group">
+            <%= label f, :vessel_name, class: "control-label" %>
+              <%= text_input f, :vessel_name, class: "form-control", required: true %>
+                <%= error_tag f, :vessel_name %>
+          </div>
+          <div class="form-group">
+            <%= label f, :voyage_no, class: "control-label" %>
+              <%= text_input f, :voyage_no, class: "form-control", required: true %>
+                <%= error_tag f, :voyage_no %>
+          </div>
+          <div class="form-group">
+            <%= label f, :shipping_liner, class: "control-label" %>
+              <%= text_input f, :shipping_liner, class: "form-control", required: true %>
+                <%= error_tag f, :shipping_liner %>
+          </div>
+        </div>
+        <div class="col-sm-6">
 
+          <div class="form-group">
+            <%= label f, "Estimate to Arrive", class: "control-label" %><br>
+              <%= datetime_select f, :eta, class: "form-control", required: true %>
+                <%= error_tag f, :eta %>
+          </div>
+          <div class="form-group">
+            <%= label f, "Actual to Arrive", class: "control-label" %><br>
+              <%= datetime_select f, :ata, class: "form-control" %>
+                <%= error_tag f, :ata %>
+          </div>
+          <div class="form-group">
+            <%= label f, "Actual to Berth", class: "control-label" %><br>
+              <%= datetime_select f, :atb, class: "form-control" %>
+                <%= error_tag f, :atb %>
+          </div>
+          <div class="form-group">
+            <%= label f, "Date Of Container D&D", class: "control-label" %><br>
+              <%= datetime_select f, :dd_date, class: "form-control" %>
+                <%= error_tag f, :dd_date %>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-sm-3">
+          <div class="form-group">
+            <%= label f, :declared_by, class: "control-label" %>
+              <%= text_input f, :declared_by, class: "form-control", required: true %>
+                <%= error_tag f, :declared_by %>
+          </div>
+          <div class="form-group">
+            <%= label f, :shipper, class: "control-label" %>
+              <%= text_input f, :shipper, class: "form-control", required: true %>
+                <%= error_tag f, :shipper %>
+          </div>
+          <div class="form-group">
+            <%= label f, :customer, class: "control-label" %>
+              <%= text_input f, :customer, class: "form-control", required: true %>
+                <%= error_tag f, :customer %>
+          </div>
+          <div class="form-group">
+            <%= label f, :contact_no, class: "control-label" %>
+              <%= text_input f, :contact_no, class: "form-control", required: true %>
+                <%= error_tag f, :contact_no %>
+          </div>
+        </div>
+        <div class="col-sm-3">
+          <div class="form-group">
+            <%= label f, :delivery_mode, class: "control-label" %>
+              <%= select f, :delivery_mode, ["Normal Trailer", "Side Loader"] ,class: "form-control" %>
+                <%= error_tag f, :delivery_mode %>
+          </div>
+          <div class="form-group">
+            <%= label f, :delivery_type, class: "control-label" %>
+              <%= select f, :delivery_type,["1x20","2x20","1x40"], class: "form-control" %>
+                <%= error_tag f, :delivery_type %>
+          </div>
+          <div class="form-group">
+            <%= label f, :from, class: "control-label" %>
+              <%= select f, :from ,["Tawau", "Kota Kinabalu"], class: "form-control" %>
+                <%= error_tag f, :from %>
+          </div>
 
-  <div class="form-group">
-    <%= label f, :last_activity, class: "control-label" %>
-    <%= text_input f, :last_activity, class: "form-control" %>
-    <%= error_tag f, :last_activity %>
-  </div>
+          <div class="form-group">
+            <%= label f, :to, class: "control-label" %>
+              <%= select f, :to , Repo.all(from d in DeliveryLocation, select: d.name), class: "form-control" %>
+                <%= error_tag f, :to %>
+          </div>
+        </div>
+        <div class="col-sm-3">
+           <div class="form-group">
+        <%= label f, :containers, class: "control-label" %>
+          <%= textarea f, :containers,  "data-role": "tagsinput", class: "form-control", required: true %>
+            <%= error_tag f, :containers %>
+      </div>
+        </div>
+      </div>
 
-  <div class="form-group">
-    <%= label f, :containers, class: "control-label" %>
-    <%= text_input f, :containers,  "data-role": "tagsinput", class: "form-control" %>
-    <%= error_tag f, :containers %>
-  </div>
+      <div class="form-group" style="display: none;">
+        <%= label f, :last_activity, class: "control-label" %>
+          <%= text_input f, :last_activity, class: "form-control" %>
+            <%= error_tag f, :last_activity %>
+      </div>
 
+     
 
-  <div class="form-group">
-  <%= label f, :job_type, class: "control-label" %>
-  <%= select f, :job_type, [ {"Import", "Import"}, {"Export", "Export"}, {"Local Transport", "Local Transport"}], class: "form-control" %>
-  <%= error_tag f, :job_type %>
-</div>
-
-
-  <div class="form-group">
-    <%= submit "Submit", class: "btn btn-primary" %>
-  </div>
-<% end %>
+      <div class="form-group">
+        <%= submit "Submit", class: "btn btn-primary" %>
+      </div>
+      <% end %>

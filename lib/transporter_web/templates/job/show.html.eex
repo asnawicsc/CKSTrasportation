@@ -96,7 +96,7 @@
                             <img class="circle thumb64" src="/images/uploads/<%= act.img_url %>" style="image-orientation: from-image;">
                             <% end %>
                               <p class="small">
-
+       <%= act.id %>-
                                <%= act.inserted_at  |> Timex.shift(hours: 8) |> Timex.format!( "%Y-%m-%d %I:%M %P", :strftime) %> 
                               </p>
                       </div>
@@ -135,7 +135,7 @@
                               <img class="circle thumb64" src="/images/uploads/<%= act.img_url %>" style="image-orientation: from-image;">
                               <% end %>
                                 <p class="small">
-
+       <%= act.id %>-
                                   <%= act.inserted_at  |> Timex.shift(hours: 8) |> Timex.format!( "%Y-%m-%d %I:%M %P", :strftime) %> 
                                 </p>
                         </div>

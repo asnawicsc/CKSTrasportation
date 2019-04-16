@@ -4,7 +4,7 @@ defmodule TransporterWeb.LocationChannel do
   alias Transporter.Settings
   alias Transporter.Settings.User
   alias Transporter.Logistic
-  alias Transporter.Logistic.{Activity, Job, UserJob, Image}
+  alias Transporter.Logistic.{Activity, Job, UserJob, Image, Container}
 
   def join("location:" <> user_id, payload, socket) do
     if authorized?(payload, user_id) do
@@ -58,8 +58,13 @@ defmodule TransporterWeb.LocationChannel do
         )
 
       jobs = Repo.all(from(j in Job, where: j.id in ^job_ids))
+      IO.inspect(jobs)
 
       for j <- jobs do
+        # find out the pending containers
+        names = j.containers |> String.split(",")
+        containers = Repo.all(from(c in Container, where: c.name in ^names))
+
         message = %{
           job_no: j.job_no,
           description: j.description,
@@ -69,6 +74,7 @@ defmodule TransporterWeb.LocationChannel do
           completedContainers: ""
         }
 
+        IO.inspect(message)
         broadcast(socket, "new_request", message)
       end
 
@@ -82,16 +88,62 @@ defmodule TransporterWeb.LocationChannel do
         )
 
       jobs2 = Repo.all(from(j in Job, where: j.id in ^job_ids2))
+      # find out the pending containers
+      IO.inspect(jobs2)
 
       for j <- jobs2 do
+        names = j.containers |> String.split(",")
+        containers = Repo.all(from(c in Container, where: c.name in ^names))
+
+        pending_containers =
+          case user.user_level do
+            "LorryDriver" ->
+              containers |> Enum.filter(fn x -> x.status == "Pending Transport" end)
+
+            "Gateman" ->
+              containers |> Enum.filter(fn x -> x.status == "Pending Checking" end)
+
+            "Forwarder" ->
+              containers |> Enum.filter(fn x -> x.status == "Pending Clearance" end)
+
+            _ ->
+              containers
+          end
+
+        IO.inspect(pending_containers)
+
+        pending_containers =
+          pending_containers
+          |> Enum.map(fn x -> x.name end)
+          |> Enum.join(",")
+
+        completed_containers =
+          case user.user_level do
+            "LorryDriver" ->
+              containers |> Enum.filter(fn x -> x.status == "Pickup Container" end)
+
+            "Gateman" ->
+              containers |> Enum.filter(fn x -> x.status == "Pending Transport" end)
+
+            "Forwarder" ->
+              containers |> Enum.filter(fn x -> x.status == "Pending Checking" end)
+
+            _ ->
+              containers
+          end
+          |> Enum.map(fn x -> x.name end)
+          |> Enum.join(",")
+
         message = %{
           job_no: j.job_no,
           description: j.description,
           insertedAt:
             DateTime.from_naive!(j.inserted_at, "Etc/UTC") |> DateTime.to_unix(:millisecond),
-          pendingContainers: j.containers,
-          completedContainers: ""
+          pendingContainers: pending_containers,
+          completedContainers: completed_containers
         }
+
+        IO.inspect(message)
 
         broadcast(socket, "accepted_request", message)
       end

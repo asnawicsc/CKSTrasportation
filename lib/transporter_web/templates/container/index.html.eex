@@ -7,6 +7,7 @@
       <th>Job</th>
       <th>Name</th>
       <th>Status</th>
+      <th>Trailers</th>
 
       <th></th>
     </tr>
@@ -18,6 +19,7 @@
       <td><%= container.job_id %></td>
       <td><%= container.name %></td>
       <td><%= container.status %></td>
+      <td><%= container.trailer_no %></td>
 
       <td class="text-right">
         <span><%= link "Show", to: container_path(@conn, :show, container), class: "btn btn-default btn-xs" %></span>

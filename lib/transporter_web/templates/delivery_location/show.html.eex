@@ -1,0 +1,18 @@
+<h2>Show Delivery location</h2>
+
+<ul>
+
+  <li>
+    <strong>Name:</strong>
+    <%= @delivery_location.name %>
+  </li>
+
+  <li>
+    <strong>Zone:</strong>
+    <%= @delivery_location.zone %>
+  </li>
+
+</ul>
+
+<span><%= link "Edit", to: delivery_location_path(@conn, :edit, @delivery_location) %></span>
+<span><%= link "Back", to: delivery_location_path(@conn, :index) %></span>

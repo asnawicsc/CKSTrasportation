@@ -9,14 +9,24 @@ defmodule Transporter.Logistic.Activity do
     field(:job_id, :integer)
     field(:location, :string)
     field(:message, :binary)
-
+    field(:container_id, :integer)
+    field(:container_name, :string)
     timestamps()
   end
 
   @doc false
   def changeset(activity, attrs) do
     activity
-    |> cast(attrs, [:job_id, :created_by, :created_id, :message, :location, :fee])
+    |> cast(attrs, [
+      :container_id,
+      :container_name,
+      :job_id,
+      :created_by,
+      :created_id,
+      :message,
+      :location,
+      :fee
+    ])
     |> validate_required([:job_id, :created_by, :created_id, :message])
   end
 end

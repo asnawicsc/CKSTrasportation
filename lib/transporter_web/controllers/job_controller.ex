@@ -11,7 +11,14 @@ defmodule TransporterWeb.JobController do
   end
 
   def new(conn, _params) do
-    changeset = Logistic.change_job(%Job{})
+    changeset =
+      Job.changeset(%Job{}, %{
+        eta: Timex.now(),
+        ata: Timex.now(),
+        atb: Timex.now(),
+        dd_date: Timex.now()
+      })
+
     render(conn, "new.html", changeset: changeset)
   end
 

@@ -161,7 +161,7 @@ defmodule Transporter.Logistic do
             fee: a.fee,
             inserted_at: a.inserted_at
           },
-          order_by: [a.inserted_at]
+          order_by: [a.id]
         )
       )
     end
