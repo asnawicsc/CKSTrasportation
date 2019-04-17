@@ -11,6 +11,9 @@ defmodule Transporter.Logistic.Activity do
     field(:message, :binary)
     field(:container_id, :integer)
     field(:container_name, :string)
+    field(:delivery_mode, :string)
+    field(:delivery_type, :string)
+    field(:trailer_no, :string)
     timestamps()
   end
 
@@ -18,6 +21,9 @@ defmodule Transporter.Logistic.Activity do
   def changeset(activity, attrs) do
     activity
     |> cast(attrs, [
+      :trailer_no,
+      :delivery_type,
+      :delivery_mode,
       :container_id,
       :container_name,
       :job_id,

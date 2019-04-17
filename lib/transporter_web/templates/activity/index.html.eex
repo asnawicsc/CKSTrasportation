@@ -7,6 +7,10 @@
       <th>Created by</th>
       <th>Message</th>
       <th>Location</th>
+      <th>Container</th>
+          <th>Trailer</th>
+              <th>Type</th>
+                  <th>Mode</th>
       <th>Fee</th>
       <th>At</th>
       <th></th>
@@ -26,6 +30,10 @@
 <% end %>
       </td>
       <td><%= activity.location %></td>
+      <td><%= activity.container_name %></td>
+      <td><%= activity.trailer_no %></td>
+      <td><%= activity.delivery_type %></td>
+      <td><%= activity.delivery_mode %></td>
       <td><%= activity.fee %></td>
       <td><%= activity.inserted_at |> Timex.shift(hours: 8) |> Timex.format!( "%Y-%m-%d %I:%M %P", :strftime) %></td>
       <td class="text-right">

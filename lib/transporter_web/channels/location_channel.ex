@@ -97,9 +97,6 @@ defmodule TransporterWeb.LocationChannel do
 
         pending_containers =
           case user.user_level do
-            "LorryDriver" ->
-              containers |> Enum.filter(fn x -> x.status == "Pending Transport" end)
-
             "Gateman" ->
               containers |> Enum.filter(fn x -> x.status == "Pending Checking" end)
 
@@ -119,9 +116,6 @@ defmodule TransporterWeb.LocationChannel do
 
         completed_containers =
           case user.user_level do
-            "LorryDriver" ->
-              containers |> Enum.filter(fn x -> x.status == "Pickup Container" end)
-
             "Gateman" ->
               containers |> Enum.filter(fn x -> x.status == "Pending Transport" end)
 

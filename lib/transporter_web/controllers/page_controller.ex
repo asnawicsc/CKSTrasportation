@@ -8,9 +8,27 @@ defmodule TransporterWeb.PageController do
   def webhook_get(conn, params) do
     IO.inspect(params)
 
-    conn
-    |> put_resp_content_type("application/json")
-    |> send_resp(200, Poison.encode!(%{status: "received"}))
+    case params["scope"] do
+      "login" ->
+        res = Repo.all(from(u in User, where: u.pin == ^params["pin"]))
+
+        if res != [] do
+          user = hd(res)
+
+          conn
+          |> put_resp_content_type("application/json")
+          |> send_resp(200, Poison.encode!(%{username: user.username, level: user.user_level}))
+        else
+          conn
+          |> put_resp_content_type("application/json")
+          |> send_resp(200, Poison.encode!(%{status: "received"}))
+        end
+
+      _ ->
+        conn
+        |> put_resp_content_type("application/json")
+        |> send_resp(200, Poison.encode!(%{status: "received"}))
+    end
   end
 
   def webhook_post(conn, params) do
@@ -104,7 +122,10 @@ defmodule TransporterWeb.PageController do
                       "#{user.username} with container #{container.name} arrived destination.",
                     location: Poison.encode!(params["position"]),
                     container_id: container.id,
-                    container_name: container.name
+                    container_name: container.name,
+                    trailer_no: params["trailer"],
+                    delivery_type: params["type"],
+                    delivery_mode: params["mode"]
                   },
                   job,
                   user
@@ -128,7 +149,10 @@ defmodule TransporterWeb.PageController do
                     message: message,
                     location: Poison.encode!(params["position"]),
                     container_id: container.id,
-                    container_name: container.name
+                    container_name: container.name,
+                    trailer_no: params["trailer"],
+                    delivery_type: params["type"],
+                    delivery_mode: params["mode"]
                   },
                   job,
                   user

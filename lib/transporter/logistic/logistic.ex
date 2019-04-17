@@ -140,7 +140,11 @@ defmodule Transporter.Logistic do
             message: a.message,
             location: a.location,
             fee: a.fee,
-            inserted_at: a.inserted_at
+            inserted_at: a.inserted_at,
+            container_name: a.container_name,
+            trailer_no: a.trailer_no,
+            delivery_type: a.delivery_type,
+            delivery_mode: a.delivery_mode
           }
         )
       )
@@ -159,7 +163,11 @@ defmodule Transporter.Logistic do
             message: a.message,
             location: a.location,
             fee: a.fee,
-            inserted_at: a.inserted_at
+            inserted_at: a.inserted_at,
+            container_name: a.container_name,
+            trailer_no: a.trailer_no,
+            delivery_type: a.delivery_type,
+            delivery_mode: a.delivery_mode
           },
           order_by: [a.id]
         )
@@ -384,7 +392,7 @@ defmodule Transporter.Logistic do
 
     resized =
       Mogrify.open(absolute_path)
-      |> resize("200x200")
+      |> resize("600x600")
       |> save(path: absolute_path_bin)
 
     File.cp(resized.path, absolute_path)
