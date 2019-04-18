@@ -97,11 +97,11 @@ defmodule TransporterWeb.LocationChannel do
 
         pending_containers =
           case user.user_level do
+            "LorryDriver" ->
+              containers |> Enum.filter(fn x -> x.status == "Pending Transport" end)
+
             "Gateman" ->
               containers |> Enum.filter(fn x -> x.status == "Pending Checking" end)
-
-            "Forwarder" ->
-              containers |> Enum.filter(fn x -> x.status == "Pending Clearance" end)
 
             _ ->
               containers
@@ -116,14 +116,23 @@ defmodule TransporterWeb.LocationChannel do
 
         completed_containers =
           case user.user_level do
+            "LorryDriver" ->
+              containers |> Enum.filter(fn x -> x.status == "Arrived Destination" end)
+
             "Gateman" ->
               containers |> Enum.filter(fn x -> x.status == "Pending Transport" end)
 
-            "Forwarder" ->
-              containers |> Enum.filter(fn x -> x.status == "Pending Checking" end)
-
             _ ->
               containers
+          end
+          |> Enum.map(fn x -> x.name end)
+          |> Enum.join(",")
+
+        pickedContainers =
+          if user.user_level == "LorryDriver" do
+            containers |> Enum.filter(fn x -> x.status == "Pickup Container" end)
+          else
+            containers
           end
           |> Enum.map(fn x -> x.name end)
           |> Enum.join(",")
@@ -134,12 +143,44 @@ defmodule TransporterWeb.LocationChannel do
           insertedAt:
             DateTime.from_naive!(j.inserted_at, "Etc/UTC") |> DateTime.to_unix(:millisecond),
           pendingContainers: pending_containers,
-          completedContainers: completed_containers
+          completedContainers: completed_containers,
+          pickedContainers: pickedContainers
         }
 
         IO.inspect(message)
 
         broadcast(socket, "accepted_request", message)
+      end
+
+      job_ids3 =
+        Repo.all(
+          from(
+            u in UserJob,
+            where: u.user_id == ^user.id and u.status == ^"done",
+            select: u.job_id
+          )
+        )
+
+      jobs3 = Repo.all(from(j in Job, where: j.id in ^job_ids3))
+      # find out the pending containers
+      IO.inspect(jobs3)
+
+      for j <- jobs3 do
+        # find out the pending containers
+        names = j.containers |> String.split(",")
+        containers = Repo.all(from(c in Container, where: c.name in ^names))
+
+        message = %{
+          job_no: j.job_no,
+          description: j.description,
+          insertedAt:
+            DateTime.from_naive!(j.updated_at, "Etc/UTC") |> DateTime.to_unix(:millisecond),
+          pendingContainers: j.containers,
+          completedContainers: ""
+        }
+
+        IO.inspect(message)
+        broadcast(socket, "completed_request", message)
       end
     end
 

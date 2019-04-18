@@ -30,14 +30,14 @@
         </li>
 
         <li class=" ">
-          <a href="/users" title="FCL Import/Export Container">
+          <a href="/jobs/new" title="FCL Import/Export Container">
          
               <em class="fa fa-exchange-alt"></em>
               <span >FCL Import/Export Container</span>
            </a>
         </li>
         <li class=" ">
-          <a href="/users" title="LCL Export Container">
+          <a href="/jobs/new" title="LCL Export Container">
          
               <em class="fa fa-boxes"></em>
               <span >LCL Export Container</span>
@@ -45,7 +45,7 @@
         </li>
 
         <li class=" ">
-          <a href="/users" title="MT Repo Container">
+          <a href="/jobs/new" title="MT Repo Container">
          
               <em class="fa fa-share"></em>
               <span >MT Repo Container</span>
@@ -57,7 +57,7 @@
         </li>
 
         <li class=" ">
-          <a href="/jobs/new" title="Forwarding acknowledement">
+          <a href="/users" title="Forwarding acknowledement">
          
             <em class="icon-grid"></em>
             <span>Forwarding acknowledement</span>

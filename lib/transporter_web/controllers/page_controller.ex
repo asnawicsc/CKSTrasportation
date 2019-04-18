@@ -40,7 +40,11 @@ defmodule TransporterWeb.PageController do
         # important: the job no received is actually the container no
 
         container =
-          Repo.all(from(c in Container, where: c.name == ^params["job_no"])) |> List.first()
+          if params["job_type"] == "gateman" do
+            %{job_no: params["job_no"], id: 0, name: ""}
+          else
+            Repo.all(from(c in Container, where: c.name == ^params["job_no"])) |> List.first()
+          end
 
         job = Repo.get_by(Job, job_no: container.job_no)
 
@@ -84,8 +88,7 @@ defmodule TransporterWeb.PageController do
                     job_id: job.id,
                     created_by: user.username,
                     created_id: user.id,
-                    message:
-                      "#{user.username} has cleared custom for container #{container.name}.",
+                    message: "#{user.username} has cleared custom for #{job.job_no}.",
                     location: Poison.encode!(params["position"]),
                     container_id: container.id,
                     container_name: container.name
@@ -99,15 +102,61 @@ defmodule TransporterWeb.PageController do
               names = job.containers |> String.split(",")
               containers = Repo.all(from(c in Container, where: c.name in ^names))
 
-              res2 = Logistic.update_container(container, %{status: "Pending Checking"})
-              IO.inspect(res2)
+              res10 =
+                for container2 <- containers do
+                  res2 = Logistic.update_container(container2, %{status: "Pending Checking"})
+                end
 
               rem = Enum.filter(containers, fn x -> x.status == "Pending Clearance" end)
 
               if Enum.count(rem) == 0 do
                 res = Logistic.update_user_job(us, %{status: "done"})
-                IO.inspect(res)
+
+                users2 = Repo.all(from(u in User, where: u.user_level == ^"Gateman"))
+                now = Timex.now() |> DateTime.to_unix(:millisecond)
+
+                for user2 <- users2 do
+                  jobq = %{"job_id" => job.id, "user_id" => user2.id}
+                  us = Repo.get_by(Logistic.UserJob, job_id: job.id, user_id: user2.id)
+
+                  if us == nil do
+                    jobq = Map.put(jobq, "status", "pending accept")
+                    {:ok, usj} = Logistic.create_user_job(jobq)
+
+                    {:ok, act2} =
+                      Logistic.create_activity(
+                        %{
+                          created_by: user.username,
+                          created_id: user.id,
+                          job_id: usj.job_id,
+                          message:
+                            "Assigned to #{user2.username}. Pending accept from #{
+                              user2.user_level
+                            }."
+                        },
+                        job,
+                        user
+                      )
+
+                    topic = "location:#{user2.username}"
+                    event = "new_request"
+
+                    message = %{
+                      job_no: job.job_no,
+                      description: job.description,
+                      insertedAt: now,
+                      pendingContainers: job.containers,
+                      completedContainers: ""
+                    }
+
+                    TransporterWeb.Endpoint.broadcast(topic, event, message)
+                  end
+                end
+              else
+                IEx.pry()
               end
+
+              # broadcast to all the gateman... 
 
               {:ok, act}
 
