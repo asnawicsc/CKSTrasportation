@@ -144,7 +144,8 @@ defmodule Transporter.Logistic do
             container_name: a.container_name,
             trailer_no: a.trailer_no,
             delivery_type: a.delivery_type,
-            delivery_mode: a.delivery_mode
+            delivery_mode: a.delivery_mode,
+            activity_type: a.activity_type
           }
         )
       )
@@ -167,7 +168,8 @@ defmodule Transporter.Logistic do
             container_name: a.container_name,
             trailer_no: a.trailer_no,
             delivery_type: a.delivery_type,
-            delivery_mode: a.delivery_mode
+            delivery_mode: a.delivery_mode,
+            activity_type: a.activity_type
           },
           order_by: [a.id]
         )

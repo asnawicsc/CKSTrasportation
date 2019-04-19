@@ -1,34 +1,65 @@
 <h2>Listing Containers</h2>
+<div class="row">
+  <div class="col-lg-7">
+    <div class="card card-default">
+      <div class="card-body">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Job no</th>
+              <th>Job</th>
+              <th>Name</th>
+              <th>Status</th>
+              <th>Trailers</th>
+              <th>Return Depot</th>
+                 <th>Driver</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <%= for container <- @containers do %>
+              <tr>
+                <td>
+                  <%= container.job_no %>
+                </td>
+                <td>
+                  <%= container.job_id %>
+                </td>
+                <td>
+                  <%= container.name %>
+                </td>
+                <td>
+                  <%= container.status %>
+                </td>
+                <td>
+                  <%= container.trailer_no %>
+                </td>
+                <td>
+                  <%= container.return_depot %>
+                </td>
+                <td>
+                  <%= container.driver_name %>
+                </td>
+                <td class="text-right">
+                  <span><%= link "Show", to: container_path(@conn, :show, container), class: "btn btn-default btn-xs" %></span>
+                  <span><%= link "Edit", to: container_path(@conn, :edit, container), class: "btn btn-default btn-xs" %></span>
+                  <span><%= link "Delete", to: container_path(@conn, :delete, container), method: :delete, data: [confirm: "Are you sure?"], class: "btn btn-danger btn-xs" %></span>
+                </td>
+              </tr>
+              <% end %>
+          </tbody>
+        </table>
 
-<table class="table">
-  <thead>
-    <tr>
-      <th>Job no</th>
-      <th>Job</th>
-      <th>Name</th>
-      <th>Status</th>
-      <th>Trailers</th>
+        <span><%= link "New Container", to: container_path(@conn, :new) %></span>
 
-      <th></th>
-    </tr>
-  </thead>
-  <tbody>
-<%= for container <- @containers do %>
-    <tr>
-      <td><%= container.job_no %></td>
-      <td><%= container.job_id %></td>
-      <td><%= container.name %></td>
-      <td><%= container.status %></td>
-      <td><%= container.trailer_no %></td>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="card card-default">
+      <div class="card-body">
 
-      <td class="text-right">
-        <span><%= link "Show", to: container_path(@conn, :show, container), class: "btn btn-default btn-xs" %></span>
-        <span><%= link "Edit", to: container_path(@conn, :edit, container), class: "btn btn-default btn-xs" %></span>
-        <span><%= link "Delete", to: container_path(@conn, :delete, container), method: :delete, data: [confirm: "Are you sure?"], class: "btn btn-danger btn-xs" %></span>
-      </td>
-    </tr>
-<% end %>
-  </tbody>
-</table>
-
-<span><%= link "New Container", to: container_path(@conn, :new) %></span>
+      </div>
+    </div>
+  </div>
+</div>

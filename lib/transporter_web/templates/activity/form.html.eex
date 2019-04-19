@@ -18,6 +18,12 @@
   </div>
 
   <div class="form-group">
+    <%= label f, :activity_type, class: "control-label" %>
+    <%= text_input f, :activity_type, class: "form-control" %>
+    <%= error_tag f, :activity_type %>
+  </div>
+
+  <div class="form-group">
     <%= label f, :created_id, class: "control-label" %>
     <%= number_input f, :created_id, class: "form-control" %>
     <%= error_tag f, :created_id %>
@@ -27,6 +33,18 @@
     <%= label f, :message, class: "control-label" %>
     <%= text_input f, :message, class: "form-control" %>
     <%= error_tag f, :message %>
+  </div>
+
+  <div class="form-group">
+    <%= label f, :container_name, class: "control-label" %>
+    <%= text_input f, :container_name, class: "form-control" %>
+    <%= error_tag f, :container_name %>
+  </div>
+
+  <div class="form-group">
+    <%= label f, :container_id, class: "control-label" %>
+    <%= number_input f, :container_id, class: "form-control" %>
+    <%= error_tag f, :container_id %>
   </div>
 
   <div class="form-group">

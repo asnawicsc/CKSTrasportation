@@ -35,7 +35,8 @@ defmodule TransporterWeb.JobController do
                   created_by: "System",
                   created_id: 1,
                   job_id: job.id,
-                  message: "Pending assignment for Forwarder."
+                  message: "Pending assignment for Forwarder.",
+                  activity_type: "forwarder_assign"
                 },
                 job,
                 Repo.get(User, conn.private.plug_session["user_id"])
@@ -51,7 +52,13 @@ defmodule TransporterWeb.JobController do
         end
 
         for name <- job_params["containers"] |> String.split(",") do
-          a = Logistic.create_container(%{job_id: job.id, job_no: job.job_no, name: name})
+          a =
+            Logistic.create_container(%{
+              job_id: job.id,
+              job_no: job.job_no,
+              name: String.trim(name)
+            })
+
           IO.inspect(a)
         end
 

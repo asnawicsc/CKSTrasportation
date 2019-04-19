@@ -14,6 +14,7 @@ defmodule Transporter.Logistic.Activity do
     field(:delivery_mode, :string)
     field(:delivery_type, :string)
     field(:trailer_no, :string)
+    field(:activity_type, :string)
     timestamps()
   end
 
@@ -21,6 +22,7 @@ defmodule Transporter.Logistic.Activity do
   def changeset(activity, attrs) do
     activity
     |> cast(attrs, [
+      :activity_type,
       :trailer_no,
       :delivery_type,
       :delivery_mode,
@@ -33,6 +35,6 @@ defmodule Transporter.Logistic.Activity do
       :location,
       :fee
     ])
-    |> validate_required([:job_id, :created_by, :created_id, :message])
+    |> validate_required([:activity_type, :job_id, :created_by, :created_id, :message])
   end
 end

@@ -3,81 +3,114 @@ defmodule TransporterWeb.UserJobController do
 
   alias Transporter.Logistic
   alias Transporter.Logistic.UserJob
-  require IEx
+  # require IEx
 
   def save_assignment(conn, params) do
-    map_job = params["map_job"] |> Poison.decode!() |> Enum.uniq()
+    if params["map_job"] == "" do
+      conn
+      |> put_flash(:error, "Empty info.")
+      |> redirect(to: user_path(conn, :index))
+    else
+      map_job = params["map_job"] |> Poison.decode!() |> Enum.uniq()
 
-    for jobq <- map_job do
-      us = Repo.get_by(Logistic.UserJob, job_id: jobq["job_id"], user_id: jobq["user_id"])
+      for jobq <- map_job do
+        us = Repo.get_by(Logistic.UserJob, job_id: jobq["job_id"], user_id: jobq["user_id"])
+        IO.inspect(jobq)
 
-      if us == nil do
-        jobq = Map.put(jobq, "status", "pending accept")
-        {:ok, usj} = Logistic.create_user_job(jobq)
+        if us == nil do
+          jobq = Map.put(jobq, "status", "pending accept")
+          {:ok, usj} = Logistic.create_user_job(jobq)
 
-        user = Repo.get(User, usj.user_id)
+          user = Repo.get(User, usj.user_id)
 
-        {:ok, act} =
-          Logistic.create_activity(
-            %{
-              created_by: conn.private.plug_session["user_name"],
-              created_id: usj.user_id,
-              job_id: usj.job_id,
-              message: "Assigned to #{user.username}. Pending accept from #{user.user_level}."
-            },
-            Repo.get(Job, usj.job_id),
-            Repo.get(User, conn.private.plug_session["user_id"])
-          )
+          if jobq["container_id"] != nil do
+            container = Repo.get(Container, jobq["container_id"])
 
-        topic = "location:#{user.username}"
-        event = "new_request"
+            if user.user_level == "LorryDriver" && container != nil do
+              {:ok, con} =
+                Logistic.update_container(container, %{
+                  driver_name: user.username,
+                  driver_id: user.id
+                })
+            end
+          end
 
-        j = Repo.get(Job, usj.job_id)
-
-        message = %{
-          job_no: j.job_no,
-          description: j.description,
-          insertedAt: Timex.now() |> DateTime.to_unix(:millisecond),
-          pendingContainers: j.containers,
-          completedContainers: ""
-        }
-
-        TransporterWeb.Endpoint.broadcast(topic, event, message)
-      else
-        user = Repo.get(User, us.user_id)
-
-        if user.user_level == "LorryDriver" do
           {:ok, act} =
             Logistic.create_activity(
               %{
                 created_by: conn.private.plug_session["user_name"],
-                created_id: us.user_id,
-                job_id: us.job_id,
-                message: "Assigned to #{user.username}. Pending accept from #{user.user_level}."
+                created_id: usj.user_id,
+                job_id: usj.job_id,
+                message: "Assigned to #{user.username}. Pending accept from #{user.user_level}.",
+                activity_type: "#{String.downcase(user.user_level)}_assigned"
               },
-              Repo.get(Job, us.job_id),
+              Repo.get(Job, usj.job_id),
               Repo.get(User, conn.private.plug_session["user_id"])
             )
 
           topic = "location:#{user.username}"
           event = "new_request"
 
-          j = Repo.get(Job, us.job_id)
+          j = Repo.get(Job, usj.job_id)
 
           message = %{
             job_no: j.job_no,
             description: j.description,
-            insertedAt: Timex.now() |> DateTime.to_unix(:millisecond)
+            insertedAt: Timex.now() |> DateTime.to_unix(:millisecond),
+            pendingContainers: j.containers,
+            completedContainers: ""
           }
 
           TransporterWeb.Endpoint.broadcast(topic, event, message)
+        else
+          user = Repo.get(User, us.user_id)
+
+          if jobq["container_id"] != nil do
+            container = Repo.get(Container, jobq["container_id"])
+
+            if user.user_level == "LorryDriver" && container != nil do
+              {:ok, con} =
+                Logistic.update_container(container, %{
+                  driver_name: user.username,
+                  driver_id: user.id
+                })
+            end
+          end
+
+          if user.user_level == "LorryDriver" do
+            {:ok, act} =
+              Logistic.create_activity(
+                %{
+                  created_by: conn.private.plug_session["user_name"],
+                  created_id: us.user_id,
+                  job_id: us.job_id,
+                  message: "Assigned to #{user.username}. Pending accept from #{user.user_level}.",
+                  activity_type: "#{String.downcase(user.user_level)}_assigned"
+                },
+                Repo.get(Job, us.job_id),
+                Repo.get(User, conn.private.plug_session["user_id"])
+              )
+
+            topic = "location:#{user.username}"
+            event = "new_request"
+
+            j = Repo.get(Job, us.job_id)
+
+            message = %{
+              job_no: j.job_no,
+              description: j.description,
+              insertedAt: Timex.now() |> DateTime.to_unix(:millisecond)
+            }
+
+            TransporterWeb.Endpoint.broadcast(topic, event, message)
+          end
         end
       end
-    end
 
-    conn
-    |> put_flash(:info, "User job created successfully.")
-    |> redirect(to: user_path(conn, :index))
+      conn
+      |> put_flash(:info, "User job created successfully.")
+      |> redirect(to: user_path(conn, :index))
+    end
   end
 
   def index(conn, _params) do

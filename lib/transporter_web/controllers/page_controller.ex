@@ -1,8 +1,79 @@
 defmodule TransporterWeb.PageController do
   use TransporterWeb, :controller
+  require IEx
 
   def index(conn, _params) do
-    render(conn, "index.html")
+    info =
+      Repo.all(
+        from(
+          j in Job,
+          left_join: c in Container,
+          on: c.job_id == j.id,
+          select: %{
+            job_id: j.id,
+            job_no: j.job_no,
+            vessel_name: j.vessel_name,
+            voyage_no: j.voyage_no,
+            container: c.name
+          },
+          order_by: [c.name]
+        )
+      )
+      |> Enum.map(fn x -> Map.put(x, :forwarder_assign, find_act("forwarder_assign", x)) end)
+      |> Enum.map(fn x -> Map.put(x, :forwarder_assigned, find_act("forwarder_assigned", x)) end)
+      |> Enum.map(fn x -> Map.put(x, :forwarder_clear, find_act("forwarder_clear", x)) end)
+      |> Enum.map(fn x -> Map.put(x, :gateman_assigned, find_act("gateman_assigned", x)) end)
+      |> Enum.map(fn x -> Map.put(x, :gateman_ack, find_act("gateman_ack", x)) end)
+      |> Enum.map(fn x -> Map.put(x, :gateman_clear, find_act("gateman_clear", x)) end)
+      |> Enum.map(fn x ->
+        Map.put(x, :lorrydriver_assigned, find_act("lorrydriver_assigned", x))
+      end)
+      |> Enum.map(fn x -> Map.put(x, :out_lorrydriver_ack, find_act("out_lorrydriver_ack", x)) end)
+      |> Enum.map(fn x ->
+        Map.put(x, :out_lorrydriver_start, find_act("out_lorrydriver_start", x))
+      end)
+      |> Enum.map(fn x -> Map.put(x, :out_lorrydriver_end, find_act("out_lorrydriver_end", x)) end)
+
+    activities = Logistic.list_activities()
+    render(conn, "index.html", activities: activities, info: info)
+  end
+
+  def find_act(type, x) do
+    lorry = [
+      # "lorrydriver_assigned",
+      # "out_lorrydriver_ack",
+      "out_lorrydriver_start",
+      "out_lorrydriver_end"
+    ]
+
+    gate = ["gateman_clear"]
+
+    res =
+      if Enum.any?(lorry, fn x -> x == type end) || Enum.any?(gate, fn x -> x == type end) do
+        Repo.all(
+          from(
+            a in Activity,
+            where:
+              a.job_id == ^x.job_id and a.activity_type == ^type and
+                a.container_name == ^x.container,
+            select: %{datetime: a.inserted_at, pic: a.created_by}
+          )
+        )
+      else
+        Repo.all(
+          from(
+            a in Activity,
+            where: a.job_id == ^x.job_id and a.activity_type == ^type,
+            select: %{datetime: a.inserted_at, pic: a.created_by}
+          )
+        )
+      end
+
+    if res != [] do
+      hd(res)
+    else
+      nil
+    end
   end
 
   def webhook_get(conn, params) do
@@ -60,7 +131,8 @@ defmodule TransporterWeb.PageController do
                     message: "#{user.username} has checked container #{container.name}.",
                     location: Poison.encode!(params["position"]),
                     container_id: container.id,
-                    container_name: container.name
+                    container_name: container.name,
+                    activity_type: "gateman_clear"
                   },
                   job,
                   user
@@ -69,14 +141,17 @@ defmodule TransporterWeb.PageController do
               us = Repo.get_by(Logistic.UserJob, job_id: job.id, user_id: user.id)
               names = job.containers |> String.split(",")
               containers = Repo.all(from(c in Container, where: c.name in ^names))
-              res2 = Logistic.update_container(container, %{status: "Pending Transport"})
-              IO.inspect(res2)
+
+              res2 =
+                Logistic.update_container(container, %{
+                  status: "Pending Transport",
+                  return_depot: params["return_depot"]
+                })
 
               rem = Enum.filter(containers, fn x -> x.status == "Pending Checking" end)
 
               if Enum.count(rem) == 0 do
                 res = Logistic.update_user_job(us, %{status: "done"})
-                IO.inspect(res)
               end
 
               {:ok, act}
@@ -91,7 +166,8 @@ defmodule TransporterWeb.PageController do
                     message: "#{user.username} has cleared custom for #{job.job_no}.",
                     location: Poison.encode!(params["position"]),
                     container_id: container.id,
-                    container_name: container.name
+                    container_name: container.name,
+                    activity_type: "forwarder_clear"
                   },
                   job,
                   user
@@ -107,7 +183,8 @@ defmodule TransporterWeb.PageController do
                   res2 = Logistic.update_container(container2, %{status: "Pending Checking"})
                 end
 
-              rem = Enum.filter(containers, fn x -> x.status == "Pending Clearance" end)
+              containers3 = Repo.all(from(c in Container, where: c.name in ^names))
+              rem = Enum.filter(containers3, fn x -> x.status == "Pending Clearance" end)
 
               if Enum.count(rem) == 0 do
                 res = Logistic.update_user_job(us, %{status: "done"})
@@ -132,7 +209,8 @@ defmodule TransporterWeb.PageController do
                           message:
                             "Assigned to #{user2.username}. Pending accept from #{
                               user2.user_level
-                            }."
+                            }.",
+                          activity_type: "gateman_assigned"
                         },
                         job,
                         user
@@ -146,14 +224,15 @@ defmodule TransporterWeb.PageController do
                       description: job.description,
                       insertedAt: now,
                       pendingContainers: job.containers,
-                      completedContainers: ""
+                      completedContainers: "",
+                      by: act2.created_by
                     }
 
                     TransporterWeb.Endpoint.broadcast(topic, event, message)
                   end
                 end
               else
-                IEx.pry()
+                IO.print("error...")
               end
 
               # broadcast to all the gateman... 
@@ -174,14 +253,14 @@ defmodule TransporterWeb.PageController do
                     container_name: container.name,
                     trailer_no: params["trailer"],
                     delivery_type: params["type"],
-                    delivery_mode: params["mode"]
+                    delivery_mode: params["mode"],
+                    activity_type: "out_lorrydriver_end"
                   },
                   job,
                   user
                 )
 
               res2 = Logistic.update_container(container, %{status: "Arrived Destination"})
-              IO.inspect(res2)
 
               {:ok, act}
 
@@ -201,7 +280,8 @@ defmodule TransporterWeb.PageController do
                     container_name: container.name,
                     trailer_no: params["trailer"],
                     delivery_type: params["type"],
-                    delivery_mode: params["mode"]
+                    delivery_mode: params["mode"],
+                    activity_type: "out_lorrydriver_start"
                   },
                   job,
                   user
@@ -213,19 +293,19 @@ defmodule TransporterWeb.PageController do
                   trailer_no: params["trailer_no"]
                 })
 
-              IO.inspect(res2)
-
               {:ok, act}
           end
 
-        map = Logistic.image_upload(params["photos"], act.id)
+        if params["photos"] != nil do
+          map = Logistic.image_upload(params["photos"], act.id)
 
-        a =
-          Logistic.create_image(%{
-            activity_id: act.id,
-            filename: map.filename,
-            thumbnail: map.bin
-          })
+          a =
+            Logistic.create_image(%{
+              activity_id: act.id,
+              filename: map.filename,
+              thumbnail: map.bin
+            })
+        end
 
       "acceptJob" ->
         user = Repo.get_by(User, username: params["username"])
@@ -238,13 +318,21 @@ defmodule TransporterWeb.PageController do
             "#{user.username} accepted job #{job.job_no}."
           end
 
+        message2 =
+          if user.user_level == "LorryDriver" do
+            "out_lorrydriver_ack"
+          else
+            "#{String.downcase(user.user_level)}_ack"
+          end
+
         {:ok, act} =
           Logistic.create_activity(
             %{
               job_id: job.id,
               created_by: user.username,
               created_id: user.id,
-              message: message
+              message: message,
+              activity_type: message2
             },
             job,
             user
@@ -253,6 +341,8 @@ defmodule TransporterWeb.PageController do
         res = Repo.all(from(u in UserJob, where: u.user_id == ^user.id and u.job_id == ^job.id))
         usj = List.first(res)
         Logistic.update_user_job(usj, %{status: "pending report"})
+        # if some one cant finish the job... we dont have a handling for this situation yet.
+        # its expected the users finish the job when they acknowledge it.
     end
 
     conn

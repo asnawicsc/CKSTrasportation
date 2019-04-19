@@ -15,8 +15,9 @@ import Ecto.Query
 alias Transporter.Settings
 alias Transporter.Settings.User
 alias Transporter.Logistic
-alias Transporter.Logistic.{Activity, Job, UserJob}
+alias Transporter.Logistic.{Activity, Job, UserJob, Container}
 
 Repo.delete_all(UserJob)
 Repo.delete_all(Job)
 Repo.delete_all(Activity)
+Repo.delete_all(Container)

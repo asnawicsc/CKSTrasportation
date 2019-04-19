@@ -1,10 +1,55 @@
 <div class="row">
-  <div class="col-lg-8">
+  <div class="col-lg-7">
     <div class="card card-default">
-      <div class="card-body">
+      <div class="card-header" style="display: inline-flex;">
+        
         <p class="lead">Drag the job on the right into the grey panels.</p>
 
-        <table class="table">
+
+<div class="btn-group ">
+                           <button class="btn btn-secondary" type="button">Action</button>
+                           <button class="btn dropdown-toggle btn-secondary" type="button" data-toggle="dropdown" aria-expanded="true">
+                              <span class="sr-only">secondary</span>
+                           </button>
+                           <div class="dropdown-menu " role="menu" x-placement="bottom-start" style="position: absolute; will-change: transform; top: 0px; left: 0px; transform: translate3d(74px, 34px, 0px);">
+                               <form method="post" action="/user_jobs/save_assignment">
+      <input type="hidden" name="_csrf_token" value="<%= Phoenix.Controller.get_csrf_token %>">
+      <input type="text" name="map_job">
+      <button class="btn btn-xl btn-success dropdown-item"><em class="fa fa-save"></em> Save Assignment</button>
+
+    </form>
+        <div class="btn btn-info dropdown-item btn-xl" aria-label="report">
+      <em class="fa fa-truck-loading"></em> Report Trailer
+    </div>
+                             
+                           </div>
+                        </div>
+
+
+   
+
+    <form id="report" method="post" action="/activities/" enctype="multipart/form-data" style="display: none;">
+      <input type="hidden" name="_csrf_token" value="<%= Phoenix.Controller.get_csrf_token %>">
+
+      <select name="activity[job_id]">
+        <%= for job <- @jobs do %>
+ <option  value="<%= job.id %>"><%= job.job_no %></option>
+        <% end %>
+      </select>
+      <center>
+
+        <img class="preview" id="adhoc" alt="Click here to upload picture" style='width: 200px; ' src='data:image/png;base64, '>
+        <input class="imgInp" id="adhoc" name="activity[image]" type="file" style="display: none;" required="required">
+
+      </center>
+      <input type="hidden" name="activity[message]" value="arrived destination.">
+      <input type="text" name="activity[location]">
+
+      <button class="btn btn-md btn-warning"><em class="fa fa-truck-loading"></em> Report Trailer</button>
+    </form>
+      </div>
+      <div class="card-body">
+        <table class="table" id="users">
           <thead>
             <tr>
               <th>User</th>
@@ -71,6 +116,7 @@
 
                                                     <input type="hidden" name="activity[message]" value="accepted job <%= job.job_no %>.">
                                                     <% end %>
+                                                     <input type="hidden" name="activity[activity_type]" value="<%= String.downcase(user.user_level) %>_ack">
                                                       <button class="btn btn-xs btn-warning">Accept Job</button>
                                               </form>
                                               <% end %>
@@ -105,12 +151,13 @@
   </div>
   <div class="col-lg-4">
 
-    <table class="table">
+    <table class="table" id="jobs">
       <thead>
         <tr>
           <th>No</th>
 
-          <th>Description</th>
+          <th>Ref No</th>
+          <th>Last Activity</th>
 
         </tr>
       </thead>
@@ -118,14 +165,12 @@
         <%= for job <- @jobs do %>
           <tr>
             <td>
-              <div class="col-sm-3 draggable" aria-label="<%= job.id %>" style="min-width: 200px;">
-                <div class="card card-default">
-                  <div class="card-header">
+              <div class="col-sm-2 draggable" aria-label="<%= job.id %>" style="min-width: 150px;">
+                <div class="card card-primary" style="margin-bottom: 0px;">
+
+                  <div class="card-body bg-primary" style="cursor: pointer; min-height: 10px; min-width: 100px;  background-color: white;"><em class="fa fa-file-alt"></em>
                     <%= job.job_no %>
-                  </div>
-                  <div class="card-body" style="cursor: pointer; min-height: 100px; min-width: 100px;  background-color: white;">
-                    <%= job.last_activity %>
-                      <div class="btn btn-xs btn-danger cancel" aria-label="<%= job.id %>" style="float: right;">
+                      <div class="btn btn-xs btn-danger cancel" aria-label="<%= job.id %>" style="float: right;position: absolute;top: -10px;right: -10px;">
                         X
                       </div>
 
@@ -137,7 +182,39 @@
             </td>
 
             <td>
-              <%= job.description %>
+              <%= job.job_no %>
+            </td>
+            <td>
+              <%= job.last_activity %>
+            </td>
+
+          </tr>
+          <% end %>
+
+          <%= for container <- @containers do %>
+          <tr>
+            <td>
+              <div class="col-sm-2 draggable" aria-label="<%= container.job_id %>" container="<%= container.id %>" style="min-width: 150px;">
+                <div class="card card-info" style="margin-bottom: 0px;">
+
+                  <div class="card-body bg-info" style="cursor: pointer; min-height: 10px; min-width: 100px;  background-color: white;"><em class="fa fa-box"></em>
+                    <%= container.name %>
+                      <div class="btn btn-xs btn-danger cancel" aria-label="<%= container.id %>" style="float: right;position: absolute;top: -10px;right: -10px;">
+                        X
+                      </div>
+
+                  </div>
+                </div>
+
+              </div>
+
+            </td>
+
+            <td>
+              <%= container.job_no %>
+            </td>
+            <td>
+              <%= container.status %>
             </td>
 
           </tr>
@@ -148,34 +225,7 @@
 
   <div style="position: fixed; bottom: 5%; right: 5%; display: inline-flex;">
 
-    <form method="post" action="/user_jobs/save_assignment">
-      <input type="hidden" name="_csrf_token" value="<%= Phoenix.Controller.get_csrf_token %>">
-      <input type="hidden" name="map_job">
-      <button class="btn btn-xl btn-success"><em class="fa fa-save"></em> Save Assignment</button>
 
-    </form>
-    <div class="btn btn-info" aria-label="report">
-      <em class="fa fa-truck-loading"></em> Report<br>Trailer
-    </div>
-    <form id="report" method="post" action="/activities/" enctype="multipart/form-data" style="display: none;">
-      <input type="hidden" name="_csrf_token" value="<%= Phoenix.Controller.get_csrf_token %>">
-     
-      <select name="activity[job_id]">
-        <%= for job <- @jobs do %>
- <option  value="<%= job.id %>"><%= job.job_no %></option>
-        <% end %>
-      </select>
-      <center>
-
-        <img class="preview" id="adhoc" alt="Click here to upload picture" style='width: 200px; ' src='data:image/png;base64, '>
-        <input class="imgInp" id="adhoc" name="activity[image]" type="file" style="display: none;"  required="required">
-
-      </center>
-      <input type="hidden" name="activity[message]" value="arrived destination.">
-      <input type="text" name="activity[location]" >
-
-      <button class="btn btn-md btn-warning"><em class="fa fa-truck-loading"></em> Report Trailer</button>
-    </form>
 
   </div>
 
@@ -183,6 +233,8 @@
 
 <script type="text/javascript">
   $(document).ready(function() {
+    $("table#users").DataTable();
+       $("table#jobs").DataTable();
     $("div[aria-label='report']").click(function() {
       var form = $("form#report").clone();
       form.attr("id", "report2")
@@ -227,9 +279,20 @@
       receive: function(event, ui) {
         var user_id = event.target.attributes["aria-label"].value
         var job_id = ui.item[0].attributes["aria-label"].value
+
+console.log(ui.item[0].attributes)
+testArray = 'container' in ui.item[0].attributes;
+console.log(testArray)
+    var container_id = 0;
+if (testArray) {
+ container_id = ui.item[0].attributes["container"].value
+}
+
+      
         var map = {
           "user_id": user_id,
-          "job_id": job_id
+          "job_id": job_id,
+          "container_id": container_id
         };
         var val = $("input[name='map_job']").val();
         var finalVal;
@@ -249,6 +312,52 @@
       helper: "clone",
       revert: "invalid"
     });
+
+
+
+$(document).on("click", "ul.pagination > li", function(){
+
+
+    $(".sortable").sortable({
+      receive: function(event, ui) {
+        var user_id = event.target.attributes["aria-label"].value
+        var job_id = ui.item[0].attributes["aria-label"].value
+
+console.log(ui.item[0].attributes)
+testArray = 'container' in ui.item[0].attributes;
+console.log(testArray)
+    var container_id = 0;
+if (testArray) {
+ container_id = ui.item[0].attributes["container"].value
+}
+
+      
+        var map = {
+          "user_id": user_id,
+          "job_id": job_id,
+          "container_id": container_id
+        };
+        var val = $("input[name='map_job']").val();
+        var finalVal;
+        if (val != "") {
+          finalVal = JSON.parse(val);
+        }
+        var list = [];
+        for (var i in finalVal) {
+          list.push(finalVal[i]);
+        }
+        list.push(map);
+        var val = $("input[name='map_job']").val(JSON.stringify(list));
+      }
+    });
+    $(".draggable").draggable({
+      connectToSortable: ".sortable",
+      helper: "clone",
+      revert: "invalid"
+    });
+
+})
+
     $(document).on("click", ".cancel", function() {
       var user_id = $(this).parent().parent().parent().parent().attr("aria-label")
       var job_id = $(this).attr("aria-label")

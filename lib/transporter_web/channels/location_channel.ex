@@ -71,7 +71,8 @@ defmodule TransporterWeb.LocationChannel do
           insertedAt:
             DateTime.from_naive!(j.inserted_at, "Etc/UTC") |> DateTime.to_unix(:millisecond),
           pendingContainers: j.containers,
-          completedContainers: ""
+          completedContainers: "",
+          by: j.last_by
         }
 
         IO.inspect(message)
@@ -99,6 +100,7 @@ defmodule TransporterWeb.LocationChannel do
           case user.user_level do
             "LorryDriver" ->
               containers |> Enum.filter(fn x -> x.status == "Pending Transport" end)
+              |> Enum.filter(fn x -> x.driver_id == user.id end)
 
             "Gateman" ->
               containers |> Enum.filter(fn x -> x.status == "Pending Checking" end)
@@ -118,6 +120,7 @@ defmodule TransporterWeb.LocationChannel do
           case user.user_level do
             "LorryDriver" ->
               containers |> Enum.filter(fn x -> x.status == "Arrived Destination" end)
+              |> Enum.filter(fn x -> x.driver_id == user.id end)
 
             "Gateman" ->
               containers |> Enum.filter(fn x -> x.status == "Pending Transport" end)
