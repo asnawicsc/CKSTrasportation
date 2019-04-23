@@ -7,7 +7,7 @@
    <meta name="description" content="Transporter Web Portal">
    <meta name="keywords" content="Gateman, Lorry Driver, Forwarder, Container, Logisctic Job management system">
    <link rel="icon" type="image/x-icon" href="/favicon.ico">
-   <title>CKS Sdn Bhd</title>
+   <title>CKS Transport & Forwarding Sdn Bhd</title>
    <!-- =============== VENDOR STYLES ===============-->
    <!-- FONT AWESOME-->
    <link rel="stylesheet" href="/vendor/@fortawesome/fontawesome-free-webfonts/css/fa-brands.css">
@@ -96,7 +96,7 @@
       </section>
       <!-- Page footer-->
       <footer class="footer-container">
-         <span>&copy; 2019 - <span>CKS Sdn Bhd</span></span>
+         <span>&copy; 2019 - <span>CKS Transport & Forwarding Sdn Bhd</span></span>
       </footer>
    </div>
 <div class="modal fade" id="myModalSmall" tabindex="-1" role="dialog" aria-labelledby="myModalLabelSmall" aria-hidden="true">

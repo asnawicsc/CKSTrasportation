@@ -622,4 +622,101 @@ defmodule Transporter.Logistic do
   def change_container(%Container{} = container) do
     Container.changeset(container, %{})
   end
+
+  def delivery_summary() do
+    data =
+      Repo.all(
+        from(
+          a in Activity,
+          left_join: j in Job,
+          on: a.job_id == j.id,
+          left_join: c in Container,
+          on: c.job_id == j.id,
+          where: not is_nil(a.container_name),
+          select: %{
+            vessel: j.vessel_name,
+            voyage: j.voyage_no,
+            customer: j.customer,
+            job_no: j.job_no,
+            container: a.container_name,
+            message: a.message,
+            dd: j.dd_date,
+            type: a.activity_type,
+            driver: a.created_by
+          }
+        )
+      )
+
+    j =
+      data |> Enum.filter(fn x -> x.type == "lorrydriver_assigned" end)
+      |> Enum.group_by(fn x -> x.vessel end)
+
+    ga = data |> Enum.filter(fn x -> x.type == "out_lorrydriver_ack" end)
+    gs = data |> Enum.filter(fn x -> x.type == "out_lorrydriver_start" end)
+    ge = data |> Enum.filter(fn x -> x.type == "out_lorrydriver_start" end)
+
+    %{jobs: j, ack: ga, start: gs, end: ge}
+  end
+
+  def outstanding_container() do
+    data =
+      Repo.all(
+        from(
+          a in Activity,
+          left_join: j in Job,
+          on: a.job_id == j.id,
+          left_join: c in Container,
+          on: c.job_id == j.id,
+          select: %{
+            vessel: j.vessel_name,
+            voyage: j.voyage_no,
+            customer: j.customer,
+            job_no: j.job_no,
+            container: c.name,
+            message: a.message,
+            dd: j.dd_date,
+            type: a.activity_type
+          }
+        )
+      )
+
+    j =
+      data |> Enum.filter(fn x -> x.type == "forwarder_assign" end)
+      |> Enum.group_by(fn x -> x.vessel end)
+
+    ga = data |> Enum.filter(fn x -> x.type == "gateman_ack" end)
+    gc = data |> Enum.filter(fn x -> x.type == "gateman_clear" end)
+
+    %{jobs: j, g_clear: gc, g_ack: ga}
+  end
+
+  def outstanding_forwarding() do
+    data =
+      Repo.all(
+        from(
+          a in Activity,
+          left_join: j in Job,
+          on: a.job_id == j.id,
+          select: %{
+            vessel: j.vessel_name,
+            voyage: j.voyage_no,
+            customer: j.customer,
+            job_no: j.job_no,
+            message: a.message,
+            dd: j.dd_date,
+            type: a.activity_type
+          }
+        )
+      )
+
+    j =
+      data |> Enum.filter(fn x -> x.type == "forwarder_assign" end)
+      |> Enum.group_by(fn x -> x.vessel end)
+
+    a = data |> Enum.filter(fn x -> x.type == "forwarder_assigned" end)
+    b = data |> Enum.filter(fn x -> x.type == "forwarder_ack" end)
+    c = data |> Enum.filter(fn x -> x.type == "forwarder_clear" end)
+
+    %{jobs: j, assigned: a, ack: b, clear: c}
+  end
 end

@@ -33,14 +33,14 @@
           <a href="/jobs/new" title="FCL Import/Export Container">
          
               <em class="fa fa-exchange-alt"></em>
-              <span >FCL Import/Export Container</span>
+              <span >FCL Job</span>
            </a>
         </li>
         <li class=" ">
           <a href="/jobs/new" title="LCL Export Container">
          
               <em class="fa fa-boxes"></em>
-              <span >LCL Export Container</span>
+              <span >LCL Job</span>
            </a>
         </li>
 
@@ -48,45 +48,11 @@
           <a href="/jobs/new" title="MT Repo Container">
          
               <em class="fa fa-share"></em>
-              <span >MT Repo Container</span>
+              <span >MT Repo Job</span>
            </a>
         </li>
 
-        <li class="nav-heading ">
-          <span>Operations</span>
-        </li>
-
-        <li class=" ">
-          <a href="/users" title="Forwarding acknowledement">
-         
-            <em class="icon-grid"></em>
-            <span>Forwarding acknowledement</span>
-          </a>
-        </li>
-
-        <li class=" ">
-          <a href="/users?type=forwarder" title="Document declared">
-         
-            <em class="icon-grid"></em>
-            <span>Document declared</span>
-          </a>
-        </li>
-        <li class=" ">
-          <a href="/users?type=forwarder" title="Container In/Out From Port">
-         
-            <em class="icon-grid"></em>
-            <span>Container In/Out From Port</span>
-          </a>
-        </li>
-        <li class=" ">
-          <a href="/users?type=forwarder" title="Container In/Out From Port">
-         
-            <em class="icon-grid"></em>
-            <span>Empty Return Gate passing</span>
-          </a>
-        </li>
-
-
+     
         
 
 
@@ -94,14 +60,14 @@
           <span>Reports</span>
         </li>
         <li class=" ">
-          <a href="/" title="Outstanding Forwarding">
+          <a href="/reports/forwarding" title="Outstanding Forwarding">
               <em class="icon-docs"></em>
               <span >Outstanding <br><small>Forwarding</small></span>
            </a>
 
         </li>
         <li class=" ">
-          <a href="/" title="Outstanding Container Delivery">
+          <a href="/reports/container" title="Outstanding Container Delivery">
               <em class="icon-docs"></em>
               <span >Outstanding<br><small> Container Delivery</small></span>
            </a>
@@ -115,7 +81,7 @@
 
         </li>
         <li class=" ">
-          <a href="/" title="Summary Of Delivery By Trucks">
+          <a href="/reports/delivery" title="Summary Of Delivery By Trucks">
               <em class="icon-docs"></em>
               <span >Delivery Summary<br><small>By Trucks</small></span>
            </a>

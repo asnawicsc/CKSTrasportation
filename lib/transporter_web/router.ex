@@ -7,6 +7,7 @@ defmodule TransporterWeb.Router do
     plug(:fetch_flash)
     plug(:protect_from_forgery)
     plug(:put_secure_browser_headers)
+    plug(Transporter.LoggingUser)
   end
 
   pipeline :api do
@@ -31,6 +32,15 @@ defmodule TransporterWeb.Router do
     resources("/containers", ContainerController)
     resources("/companies", CompanyController)
     resources("/delivery_location", DeliveryLocationController)
+  end
+
+  scope "/reports", TransporterWeb do
+    # Use the default browser stack
+    pipe_through(:browser)
+
+    get("/forwarding", PageController, :forwarding)
+    get("/container", PageController, :container)
+    get("/delivery", PageController, :delivery)
   end
 
   # Other scopes may use custom stacks.

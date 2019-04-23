@@ -1,4 +1,4 @@
-<h2>New Job</h2>
+<h2>Full Cargo Load</h2>
 
 <%= render "form.html", Map.put(assigns, :action, job_path(@conn, :create)) %>
 

@@ -125,6 +125,8 @@ defmodule TransporterWeb.UserController do
   def logout(conn, _params) do
     conn
     |> delete_session(:user_id)
+    |> delete_session(:user_name)
+    |> delete_session(:user_type)
     |> put_flash(:info, "Logout successfully")
     |> redirect(to: user_path(conn, :login))
   end

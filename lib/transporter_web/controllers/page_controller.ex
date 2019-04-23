@@ -2,6 +2,26 @@ defmodule TransporterWeb.PageController do
   use TransporterWeb, :controller
   require IEx
 
+  def delivery(conn, params) do
+    data = Transporter.Logistic.delivery_summary()
+
+    IO.inspect(data)
+    render(conn, "delivery_summary.html", data: data)
+  end
+
+  def container(conn, params) do
+    data = Transporter.Logistic.outstanding_container()
+
+    IO.inspect(data)
+    render(conn, "outstanding_container.html", data: data)
+  end
+
+  def forwarding(conn, params) do
+    data = Transporter.Logistic.outstanding_forwarding()
+    IO.inspect(data)
+    render(conn, "outstanding_forwarding.html", data: data)
+  end
+
   def index(conn, _params) do
     info =
       Repo.all(
@@ -20,7 +40,7 @@ defmodule TransporterWeb.PageController do
         )
       )
       |> Enum.map(fn x -> Map.put(x, :forwarder_assign, find_act("forwarder_assign", x)) end)
-      |> Enum.map(fn x -> Map.put(x, :forwarder_assigned, find_act("forwarder_assigned", x)) end)
+      |> Enum.map(fn x -> Map.put(x, :forwarder_assigned, find_act("forwarder_ack", x)) end)
       |> Enum.map(fn x -> Map.put(x, :forwarder_clear, find_act("forwarder_clear", x)) end)
       |> Enum.map(fn x -> Map.put(x, :gateman_assigned, find_act("gateman_assigned", x)) end)
       |> Enum.map(fn x -> Map.put(x, :gateman_ack, find_act("gateman_ack", x)) end)

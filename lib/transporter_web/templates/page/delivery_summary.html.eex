@@ -1,0 +1,85 @@
+<h1>Delivery Summary</h1>
+
+<table class="table table-bordered">
+  <thead>
+    <tr>
+      <th>Vessel</th>
+      <th>Voyage</th>
+      <th>Job/Customer</th>
+      <th>Container</th>
+      <th>Assigned</th>
+      <th>Start</th>
+      <th>End</th>
+      <th>Outstanding</th>
+      <th>Remaining</th>
+      <th>DD</th>
+    </tr>
+  </thead>
+  <tbody>
+<% vessels = Map.keys(@data.jobs) %>
+
+<%= for vessel <- vessels do %>
+    <%= for data <- @data.jobs[vessel] do %>
+       <% a = Enum.filter(@data.ack, fn x -> x.job_no == data.job_no end) |> Enum.count %>
+       <% b = Enum.filter(@data.start, fn x -> x.job_no == data.job_no end) |> Enum.count %>
+        <% c = Enum.filter(@data.end, fn x -> x.job_no == data.job_no end) |> Enum.count %>
+      <tr>
+        <td>
+          <%= data.vessel %>
+        </td>
+        <td>
+          <%= data.voyage %>
+        </td>
+        <td>
+          <%= data.job_no %>  /  <%= data.customer %>
+        </td>
+        <td>
+          <%= data.container %>
+        </td>
+        <td>
+        
+
+          <%= a %>  
+        </td>
+        <td>
+          <%= b %>
+        </td>
+        <td>
+          <%= c %>
+        </td>
+         <td>
+             <%= b - c %>
+        </td>
+        <td>
+          <% x = Timex.now |> DateTime.to_naive %>
+          <%= %Timex.Duration{megaseconds: 0, microseconds: 0, seconds: NaiveDateTime.diff(data.dd, x, :second)} |> Timex.Duration.to_days |> Float.round() |> Kernel.trunc %>
+        </td>
+        <td>
+          <%= data.dd%>
+        </td>
+
+      </tr>
+
+      <% end %>
+       <tr>
+          <% data =  @data.jobs[vessel] |> List.first  %>
+        <td class="text-right" colspan="6">Total</td>
+        <td>
+          
+  <% a = Enum.filter(@data.jobs[vessel], fn x -> x.vessel == data.vessel end) |> Enum.count %>
+   
+        <% c = Enum.filter(@data.clear, fn x -> x.vessel == data.vessel end) |> Enum.count %>
+ <%v = a - c %>
+<h3><%= v %></h3>
+        </td>
+        <td>
+        
+<% x = Timex.now |> DateTime.to_naive %>
+          <% z=  %Timex.Duration{megaseconds: 0, microseconds: 0, seconds: NaiveDateTime.diff(data.dd, x, :second)} |> Timex.Duration.to_days |> Float.round() |> Kernel.trunc %>
+<h3><%= z %></h3>
+        </td>
+        <td></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>

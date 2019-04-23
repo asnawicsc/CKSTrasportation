@@ -1,0 +1,87 @@
+<% require IEx %>
+<h1>OutStanding Container Delivery</h1>
+
+<table class="table">
+  <thead>
+    <tr>
+      <th>Vessel</th>
+      <th>Voyage</th>
+      <th>Job</th>
+      <th>Container</th>
+      <th>Jobs</th>
+      <th>Cleared</th>
+      <th>Outstanding</th>
+      <th>Days Remaining</th>
+      <th>DD</th>
+    </tr>
+  </thead>
+  <tbody>
+<% vessels = Map.keys(@data.jobs) %>
+
+<%= for vessel <- vessels do %>
+
+
+    <%= for data <- @data.jobs[vessel] do %>
+
+       <% a = Enum.filter(@data.jobs[vessel], fn x -> x.container == data.container end) |> Enum.count %>
+   
+        <% c = Enum.filter(@data.g_clear, fn x -> x.container == data.container end) |> Enum.count %>
+      <tr>
+        <td>
+          <%= data.vessel %>
+        </td>
+        <td>
+          <%= data.voyage %>
+        </td>
+        <td>
+          <%= data.job_no %>
+        </td>
+        <td>
+        
+          <%= data.container %>
+        
+        </td>
+        <td>
+      
+
+          <%= a %>
+        </td>
+        <td>
+          <%= c %>
+        </td>
+         <td>
+          <%= a - c %>
+        </td>
+        <td>
+          <% x = Timex.now |> DateTime.to_naive %>
+          <%= %Timex.Duration{megaseconds: 0, microseconds: 0, seconds: NaiveDateTime.diff(data.dd, x, :second)} |> Timex.Duration.to_days |> Float.round() |> Kernel.trunc %>
+        </td>
+        <td>
+          <%= data.dd%>
+        </td>
+
+      </tr>
+
+      <% end %>
+      <tr>
+          <% data =  @data.jobs[vessel] |> List.first  %>
+        <td class="text-right" colspan="6">Total</td>
+        <td>
+          
+  <% a = Enum.filter(@data.jobs[vessel], fn x -> x.vessel == data.vessel end) |> Enum.count %>
+   
+        <% c = Enum.filter(@data.g_clear, fn x -> x.vessel == data.vessel end) |> Enum.count %>
+ <%v = a - c %>
+<h3><%= v %></h3>
+        </td>
+        <td>
+        
+<% x = Timex.now |> DateTime.to_naive %>
+          <% z=  %Timex.Duration{megaseconds: 0, microseconds: 0, seconds: NaiveDateTime.diff(data.dd, x, :second)} |> Timex.Duration.to_days |> Float.round() |> Kernel.trunc %>
+<h3><%= z %></h3>
+        </td>
+        <td></td>
+      </tr>
+      <% end %>
+  </tbody>
+</table>
