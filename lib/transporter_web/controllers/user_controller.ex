@@ -15,11 +15,39 @@ defmodule TransporterWeb.UserController do
 
     jobs = Logistic.list_jobs()
 
-    containers = Repo.all(from(c in Container))
+    containers =
+      Repo.all(
+        from(
+          c in Container,
+          left_join: r in ContainerRoute,
+          on: r.container_id == c.id,
+          select: %{
+            job_no: c.job_no,
+            status: c.status,
+            job_id: c.job_id,
+            id: c.id,
+            name: c.name,
+            from_id: r.from_id,
+            from: r.from,
+            to_id: r.to_id,
+            to: r.to,
+            route_id: r.id
+          }
+        )
+      )
+
+    locations = Settings.list_delivery_location()
 
     # need to show the list of user jobs....
 
-    render(conn, "index.html", users: users, jobs: jobs, containers: containers)
+    render(
+      conn,
+      "index.html",
+      users: users,
+      jobs: jobs,
+      containers: containers,
+      locations: locations
+    )
   end
 
   def new(conn, _params) do

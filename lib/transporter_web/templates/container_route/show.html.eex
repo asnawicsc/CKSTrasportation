@@ -1,0 +1,53 @@
+<h2>Show Container route</h2>
+
+<ul>
+
+  <li>
+    <strong>Job:</strong>
+    <%= @container_route.job_id %>
+  </li>
+
+  <li>
+    <strong>Container:</strong>
+    <%= @container_route.container_id %>
+  </li>
+
+  <li>
+    <strong>From:</strong>
+    <%= @container_route.from_id %>
+  </li>
+
+  <li>
+    <strong>To:</strong>
+    <%= @container_route.to_id %>
+  </li>
+
+  <li>
+    <strong>Driver:</strong>
+    <%= @container_route.driver_id %>
+  </li>
+
+  <li>
+    <strong>From:</strong>
+    <%= @container_route.from %>
+  </li>
+
+  <li>
+    <strong>To:</strong>
+    <%= @container_route.to %>
+  </li>
+
+  <li>
+    <strong>Driver:</strong>
+    <%= @container_route.driver %>
+  </li>
+
+  <li>
+    <strong>Lorry:</strong>
+    <%= @container_route.lorry %>
+  </li>
+
+</ul>
+
+<span><%= link "Edit", to: container_route_path(@conn, :edit, @container_route) %></span>
+<span><%= link "Back", to: container_route_path(@conn, :index) %></span>

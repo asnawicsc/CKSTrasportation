@@ -53,11 +53,39 @@ defmodule TransporterWeb.UserJobController do
 
           j = Repo.get(Job, usj.job_id)
 
+          names = j.containers |> String.split(",")
+          containers = Repo.all(from(c in Container, where: c.name in ^names))
+
+          pending_containers =
+            if user.user_level == "LorryDriver" do
+              containers |> Enum.filter(fn x -> x.status == "Pending Transport" end)
+            else
+              containers
+            end
+
+          pending_containers =
+            pending_containers
+            |> Enum.map(fn x -> x.name end)
+            |> Enum.join(",")
+
+          desc =
+            if user.user_level == "LorryDriver" && jobq["route_id"] != nil do
+              route = Repo.get(ContainerRoute, jobq["route_id"])
+
+              if route != nil do
+                "#{route.from} to #{route.to}"
+              else
+                "route not set"
+              end
+            else
+              j.description
+            end
+
           message = %{
             job_no: j.job_no,
-            description: j.description,
+            description: desc,
             insertedAt: Timex.now() |> DateTime.to_unix(:millisecond),
-            pendingContainers: j.containers,
+            pendingContainers: pending_containers,
             completedContainers: ""
           }
 

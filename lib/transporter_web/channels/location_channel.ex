@@ -65,12 +65,24 @@ defmodule TransporterWeb.LocationChannel do
         names = j.containers |> String.split(",")
         containers = Repo.all(from(c in Container, where: c.name in ^names))
 
+        pending_containers =
+          if user.user_level == "LorryDriver" do
+            containers |> Enum.filter(fn x -> x.status == "Pending Transport" end)
+          else
+            containers
+          end
+
+        pending_containers =
+          pending_containers
+          |> Enum.map(fn x -> x.name end)
+          |> Enum.join(",")
+
         message = %{
           job_no: j.job_no,
           description: j.description,
           insertedAt:
             DateTime.from_naive!(j.inserted_at, "Etc/UTC") |> DateTime.to_unix(:millisecond),
-          pendingContainers: j.containers,
+          pendingContainers: pending_containers,
           completedContainers: "",
           by: j.last_by
         }

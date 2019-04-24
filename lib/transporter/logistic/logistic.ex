@@ -719,4 +719,100 @@ defmodule Transporter.Logistic do
 
     %{jobs: j, assigned: a, ack: b, clear: c}
   end
+
+  alias Transporter.Logistic.ContainerRoute
+
+  @doc """
+  Returns the list of container_routes.
+
+  ## Examples
+
+      iex> list_container_routes()
+      [%ContainerRoute{}, ...]
+
+  """
+  def list_container_routes do
+    Repo.all(ContainerRoute)
+  end
+
+  @doc """
+  Gets a single container_route.
+
+  Raises `Ecto.NoResultsError` if the Container route does not exist.
+
+  ## Examples
+
+      iex> get_container_route!(123)
+      %ContainerRoute{}
+
+      iex> get_container_route!(456)
+      ** (Ecto.NoResultsError)
+
+  """
+  def get_container_route!(id), do: Repo.get!(ContainerRoute, id)
+
+  @doc """
+  Creates a container_route.
+
+  ## Examples
+
+      iex> create_container_route(%{field: value})
+      {:ok, %ContainerRoute{}}
+
+      iex> create_container_route(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def create_container_route(attrs \\ %{}) do
+    %ContainerRoute{}
+    |> ContainerRoute.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  @doc """
+  Updates a container_route.
+
+  ## Examples
+
+      iex> update_container_route(container_route, %{field: new_value})
+      {:ok, %ContainerRoute{}}
+
+      iex> update_container_route(container_route, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def update_container_route(%ContainerRoute{} = container_route, attrs) do
+    container_route
+    |> ContainerRoute.changeset(attrs)
+    |> Repo.update()
+  end
+
+  @doc """
+  Deletes a ContainerRoute.
+
+  ## Examples
+
+      iex> delete_container_route(container_route)
+      {:ok, %ContainerRoute{}}
+
+      iex> delete_container_route(container_route)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def delete_container_route(%ContainerRoute{} = container_route) do
+    Repo.delete(container_route)
+  end
+
+  @doc """
+  Returns an `%Ecto.Changeset{}` for tracking container_route changes.
+
+  ## Examples
+
+      iex> change_container_route(container_route)
+      %Ecto.Changeset{source: %ContainerRoute{}}
+
+  """
+  def change_container_route(%ContainerRoute{} = container_route) do
+    ContainerRoute.changeset(container_route, %{})
+  end
 end

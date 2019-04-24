@@ -28,7 +28,7 @@ defmodule TransporterWeb do
       alias Transporter.Settings
       alias Transporter.Settings.{User, DeliveryLocation}
       alias Transporter.Logistic
-      alias Transporter.Logistic.{Activity, Job, UserJob, Image, Container}
+      alias Transporter.Logistic.{ContainerRoute, Activity, Job, UserJob, Image, Container}
     end
   end
 
@@ -52,7 +52,7 @@ defmodule TransporterWeb do
       alias Transporter.Settings
       alias Transporter.Settings.{User, DeliveryLocation}
       alias Transporter.Logistic
-      alias Transporter.Logistic.{Activity, Job, UserJob, Image}
+      alias Transporter.Logistic.{ContainerRoute, Activity, Job, UserJob, Image}
     end
   end
 

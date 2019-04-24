@@ -32,6 +32,8 @@ defmodule TransporterWeb.Router do
     resources("/containers", ContainerController)
     resources("/companies", CompanyController)
     resources("/delivery_location", DeliveryLocationController)
+    resources("/container_routes", ContainerRouteController)
+    post("/create_route", ContainerRouteController, :create)
   end
 
   scope "/reports", TransporterWeb do

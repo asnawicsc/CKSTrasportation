@@ -1,0 +1,5 @@
+<h2>Edit Container route</h2>
+
+<%= render "form.html", Map.put(assigns, :action, container_route_path(@conn, :update, @container_route)) %>
+
+<span><%= link "Back", to: container_route_path(@conn, :index) %></span>

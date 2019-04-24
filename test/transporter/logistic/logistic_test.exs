@@ -336,4 +336,80 @@ defmodule Transporter.LogisticTest do
       assert %Ecto.Changeset{} = Logistic.change_container(container)
     end
   end
+
+  describe "container_routes" do
+    alias Transporter.Logistic.ContainerRoute
+
+    @valid_attrs %{container_id: 42, driver: "some driver", driver_id: 42, from: "some from", from_id: 42, job_id: 42, lorry: "some lorry", to: "some to", to_id: 42}
+    @update_attrs %{container_id: 43, driver: "some updated driver", driver_id: 43, from: "some updated from", from_id: 43, job_id: 43, lorry: "some updated lorry", to: "some updated to", to_id: 43}
+    @invalid_attrs %{container_id: nil, driver: nil, driver_id: nil, from: nil, from_id: nil, job_id: nil, lorry: nil, to: nil, to_id: nil}
+
+    def container_route_fixture(attrs \\ %{}) do
+      {:ok, container_route} =
+        attrs
+        |> Enum.into(@valid_attrs)
+        |> Logistic.create_container_route()
+
+      container_route
+    end
+
+    test "list_container_routes/0 returns all container_routes" do
+      container_route = container_route_fixture()
+      assert Logistic.list_container_routes() == [container_route]
+    end
+
+    test "get_container_route!/1 returns the container_route with given id" do
+      container_route = container_route_fixture()
+      assert Logistic.get_container_route!(container_route.id) == container_route
+    end
+
+    test "create_container_route/1 with valid data creates a container_route" do
+      assert {:ok, %ContainerRoute{} = container_route} = Logistic.create_container_route(@valid_attrs)
+      assert container_route.container_id == 42
+      assert container_route.driver == "some driver"
+      assert container_route.driver_id == 42
+      assert container_route.from == "some from"
+      assert container_route.from_id == 42
+      assert container_route.job_id == 42
+      assert container_route.lorry == "some lorry"
+      assert container_route.to == "some to"
+      assert container_route.to_id == 42
+    end
+
+    test "create_container_route/1 with invalid data returns error changeset" do
+      assert {:error, %Ecto.Changeset{}} = Logistic.create_container_route(@invalid_attrs)
+    end
+
+    test "update_container_route/2 with valid data updates the container_route" do
+      container_route = container_route_fixture()
+      assert {:ok, container_route} = Logistic.update_container_route(container_route, @update_attrs)
+      assert %ContainerRoute{} = container_route
+      assert container_route.container_id == 43
+      assert container_route.driver == "some updated driver"
+      assert container_route.driver_id == 43
+      assert container_route.from == "some updated from"
+      assert container_route.from_id == 43
+      assert container_route.job_id == 43
+      assert container_route.lorry == "some updated lorry"
+      assert container_route.to == "some updated to"
+      assert container_route.to_id == 43
+    end
+
+    test "update_container_route/2 with invalid data returns error changeset" do
+      container_route = container_route_fixture()
+      assert {:error, %Ecto.Changeset{}} = Logistic.update_container_route(container_route, @invalid_attrs)
+      assert container_route == Logistic.get_container_route!(container_route.id)
+    end
+
+    test "delete_container_route/1 deletes the container_route" do
+      container_route = container_route_fixture()
+      assert {:ok, %ContainerRoute{}} = Logistic.delete_container_route(container_route)
+      assert_raise Ecto.NoResultsError, fn -> Logistic.get_container_route!(container_route.id) end
+    end
+
+    test "change_container_route/1 returns a container_route changeset" do
+      container_route = container_route_fixture()
+      assert %Ecto.Changeset{} = Logistic.change_container_route(container_route)
+    end
+  end
 end

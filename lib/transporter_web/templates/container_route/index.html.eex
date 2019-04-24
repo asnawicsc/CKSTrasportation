@@ -1,0 +1,42 @@
+<h2>Listing Container routes</h2>
+
+<table class="table">
+  <thead>
+    <tr>
+      <th>Job</th>
+      <th>Container</th>
+      <th>From</th>
+      <th>To</th>
+      <th>Driver</th>
+      <th>From</th>
+      <th>To</th>
+      <th>Driver</th>
+      <th>Lorry</th>
+
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+<%= for container_route <- @container_routes do %>
+    <tr>
+      <td><%= container_route.job_id %></td>
+      <td><%= container_route.container_id %></td>
+      <td><%= container_route.from_id %></td>
+      <td><%= container_route.to_id %></td>
+      <td><%= container_route.driver_id %></td>
+      <td><%= container_route.from %></td>
+      <td><%= container_route.to %></td>
+      <td><%= container_route.driver %></td>
+      <td><%= container_route.lorry %></td>
+
+      <td class="text-right">
+        <span><%= link "Show", to: container_route_path(@conn, :show, container_route), class: "btn btn-default btn-xs" %></span>
+        <span><%= link "Edit", to: container_route_path(@conn, :edit, container_route), class: "btn btn-default btn-xs" %></span>
+        <span><%= link "Delete", to: container_route_path(@conn, :delete, container_route), method: :delete, data: [confirm: "Are you sure?"], class: "btn btn-danger btn-xs" %></span>
+      </td>
+    </tr>
+<% end %>
+  </tbody>
+</table>
+
+<span><%= link "New Container route", to: container_route_path(@conn, :new) %></span>
