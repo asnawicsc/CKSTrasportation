@@ -14,11 +14,23 @@ defmodule TransporterWeb.UserJobController do
       map_job = params["map_job"] |> Poison.decode!() |> Enum.uniq()
 
       for jobq <- map_job do
-        us = Repo.get_by(Logistic.UserJob, job_id: jobq["job_id"], user_id: jobq["user_id"])
+        us =
+          if jobq["route_id"] != nil do
+            Repo.get_by(
+              Logistic.UserJob,
+              job_id: jobq["job_id"],
+              user_id: jobq["user_id"],
+              route_id: jobq["route_id"]
+            )
+          else
+            Repo.get_by(Logistic.UserJob, job_id: jobq["job_id"], user_id: jobq["user_id"])
+          end
+
         IO.inspect(jobq)
 
         if us == nil do
           jobq = Map.put(jobq, "status", "pending accept")
+
           {:ok, usj} = Logistic.create_user_job(jobq)
 
           user = Repo.get(User, usj.user_id)
@@ -53,7 +65,7 @@ defmodule TransporterWeb.UserJobController do
 
           j = Repo.get(Job, usj.job_id)
 
-          names = j.containers |> String.split(",")
+          names = j.containers |> String.split(",") |> Enum.map(fn x -> String.trim(x) end)
           containers = Repo.all(from(c in Container, where: c.name in ^names))
 
           pending_containers =
@@ -124,11 +136,54 @@ defmodule TransporterWeb.UserJobController do
 
             j = Repo.get(Job, us.job_id)
 
+            names = j.containers |> String.split(",") |> Enum.map(fn x -> String.trim(x) end)
+            containers = Repo.all(from(c in Container, where: c.name in ^names))
+
+            pending_containers =
+              if user.user_level == "LorryDriver" do
+                containers |> Enum.filter(fn x -> x.status == "Pending Transport" end)
+              else
+                containers
+              end
+
+            pending_containers =
+              pending_containers
+              |> Enum.map(fn x -> x.name end)
+              |> Enum.join(",")
+
+            desc =
+              if user.user_level == "LorryDriver" && jobq["route_id"] != nil do
+                route = Repo.get(ContainerRoute, jobq["route_id"])
+
+                if route != nil do
+                  "#{route.from} to #{route.to}"
+                else
+                  "route not set"
+                end
+              else
+                j.description
+              end
+
+            jobno =
+              if user.user_level == "LorryDriver" && jobq["route_id"] != nil do
+                "#{j.job_no}_#{jobq["route_id"]}"
+              else
+                j.job_no
+              end
+
             message = %{
-              job_no: j.job_no,
-              description: j.description,
-              insertedAt: Timex.now() |> DateTime.to_unix(:millisecond)
+              job_no: jobno,
+              description: desc,
+              insertedAt: Timex.now() |> DateTime.to_unix(:millisecond),
+              pendingContainers: pending_containers,
+              completedContainers: ""
             }
+
+            # message = %{
+            #   job_no: j.job_no,
+            #   description: j.description,
+            #   insertedAt: Timex.now() |> DateTime.to_unix(:millisecond)
+            # }
 
             TransporterWeb.Endpoint.broadcast(topic, event, message)
           end

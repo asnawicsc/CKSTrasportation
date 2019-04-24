@@ -118,7 +118,7 @@ body {
     padding-right: 0; }
   @media (min-width: 768px) {
     .content-wrapper {
-      padding: 20px; }
+      padding: 10px; }
       .content-wrapper .content-heading {
         margin: -20px;
         margin-bottom: 20px;
@@ -326,7 +326,7 @@ _:-ms-lang(x),
   bottom: 0; }
 
 .layout-h .wrapper .section-container {
-  max-width: 1140px;
+  max-width: 1600px;
   margin-left: auto;
   margin-right: auto; }
   .layout-h .wrapper .section-container .content-wrapper .content-heading {

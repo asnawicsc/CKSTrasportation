@@ -1,42 +1,32 @@
 <div class="row">
-
-  <div class="col-lg-12">
+  <div class="col-sm-12">
     <div class="card card-primary">
-      <div class="card-body">
-        <table class="table">
+      <div class="card-header bg-primary">Info</div>
+    
+
+        <table class="table-hover table-bordered" id="main" style="font-size: 10px;">
           <thead>
             <tr>
-              <th>Job No</th>
-              <th>Vessel</th>
-              <th>Voyage</th>
+              <th>Job no</th>
+              <th>Vessel </th>
+              <th>Voyage </th>
+              <th>Consignee</th>
               <th>Container</th>
-              <th colspan="4">Forwarding</th>
-              <th colspan="4">GateKeeper</th>
-              <th colspan="5">Container Out</th>
-              <th colspan="5">Container In</th>
-              <th>DD Remaining</th>
-            </tr>
-            <tr>
-              <th colspan="4"></th>
-              <th>Asg</th>
-              <th>Ack</th>
-              <th>Clear</th>
+              <th>PIC</th>
+              <th>ETA</th>
+              <th>ETB</th>
+              <th>PIC</th>
+              <th>R'ced DOC</th>
               <th>Days</th>
-              <th>Asg</th>
-              <th>Ack</th>
-              <th>Clear</th>
+              <th>Cust' Decl'</th>
               <th>Days</th>
-              <th>Asg</th>
-              <th>Ack</th>
-              <th>Start</th>
-              <th>End</th>
-              <th>Days</th>
-              <th>Asg</th>
-              <th>Ack</th>
-              <th>Start</th>
-              <th>End</th>
-              <th>Days</th>
+              <th>Doc Surr<br>at Gate</th>
 
+              <th>Deliv'<br>Type</th>
+              <th>Cont<br>Out Gate</th>
+
+ <th>Days</th>
+   <th>Driver</th>
               <th></th>
             </tr>
           </thead>
@@ -53,17 +43,23 @@
                   <%= inf.voyage_no %>
                 </td>
                 <td>
+                  <%= inf.customer %>
+                </td>
+                <td>
                   <%= inf.container %>
                 </td>
                 <td>
-                  <%= if inf.forwarder_assign != nil do  %>
-
-                    <%=  inf.forwarder_assign.datetime |> Timex.shift(hours: 8) |> Timex.format!( "%d/%m %H:%M", :strftime)%>
-
-                      <span class="badge badge-primary">
-                  <%=  inf.forwarder_assign.pic %>
-
-                </span>
+                  <%= inf.pic %>
+                </td>
+                <td>
+                  <%= inf.eta  |> Timex.shift(hours: 8) |> Timex.format!( "%d/%m", :strftime)%>
+                </td>
+                <td>
+                  <%= inf.etb |> Timex.shift(hours: 8) |> Timex.format!( "%d/%m", :strftime)%>
+                </td>
+                <td>
+                  <%= if inf.forwarder_assigned != nil do  %>
+                    <%=  inf.forwarder_assigned.pic %>
 
                       <% else %>
 
@@ -74,208 +70,124 @@
 
                     <%=  inf.forwarder_assigned.datetime |> Timex.shift(hours: 8) |> Timex.format!( "%d/%m %H:%M", :strftime)%>
 
-                      <span class="badge badge-primary">
-                  <%=  inf.forwarder_assigned.pic %>
-
-                </span>
-
                       <% else %>
 
                         <% end %>
                 </td>
+                <td style="color: red;">0</td>
                 <td>
                   <%= if inf.forwarder_clear != nil do  %>
 
                     <%=  inf.forwarder_clear.datetime |> Timex.shift(hours: 8) |> Timex.format!( "%d/%m %H:%M", :strftime)%>
 
-                      <span class="badge badge-primary">
-                  <%=  inf.forwarder_clear.pic %>
-
-                </span>
-
                       <% else %>
 
                         <% end %>
                 </td>
-                <td></td>
+                <td style="color: red;">0</td>
                 <td>
                   <%= if inf.gateman_assigned != nil do  %>
 
                     <%=  inf.gateman_assigned.datetime |> Timex.shift(hours: 8) |> Timex.format!( "%d/%m %H:%M", :strftime)%>
 
-                      <span class="badge badge-primary">
-                  <%=  inf.gateman_assigned.pic %>
+                      <% else %>
 
-                </span>
+                        <% end %>
+                </td>
+
+  <td>NT</td>
+    <td>
+                  <%= if inf.out_lorrydriver_start != nil do  %>
+
+                    <%=  inf.out_lorrydriver_start.datetime |> Timex.shift(hours: 8) |> Timex.format!( "%d/%m %H:%M", :strftime)%>
+
+                  
+      
+
+           
 
                       <% else %>
 
                         <% end %>
                 </td>
-                <td>
-                  <%= if inf.gateman_ack != nil do  %>
+  <td style="color: red;">0</td>
+  <td>
+                  <%= if inf.out_lorrydriver_start != nil do  %>
 
-                    <%=  inf.gateman_ack.datetime |> Timex.shift(hours: 8) |> Timex.format!( "%d/%m %H:%M", :strftime)%>
+                   
+                  
+                  <%=  inf.out_lorrydriver_start.pic %>
 
-                      <span class="badge badge-primary">
-                  <%=  inf.gateman_ack.pic %>
-
-                </span>
-
-                      <% else %>
-
-                        <% end %>
-                </td>
-                <td>
-                  <%= if inf.gateman_clear != nil do  %>
-
-                    <%=  inf.gateman_clear.datetime |> Timex.shift(hours: 8) |> Timex.format!( "%d/%m %H:%M", :strftime)%>
-
-                      <span class="badge badge-primary">
-                  <%=  inf.gateman_clear.pic %>
-
-                </span>
+           
 
                       <% else %>
 
                         <% end %>
                 </td>
                 <td></td>
-                <td>
-                  <%= if inf.lorrydriver_assigned != nil do  %>
-
-                    <%=  inf.lorrydriver_assigned.datetime |> Timex.shift(hours: 8) |> Timex.format!( "%d/%m %H:%M", :strftime)%>
-
-                      <span class="badge badge-primary">
-                  <%=  inf.lorrydriver_assigned.pic %>
-
-                </span>
-
-                      <% else %>
-
-                        <% end %>
-                </td>
-                <td>
-                  <%= if inf.out_lorrydriver_ack != nil do  %>
-
-                    <%=  inf.out_lorrydriver_ack.datetime |> Timex.shift(hours: 8) |> Timex.format!( "%d/%m %H:%M", :strftime)%>
-
-                      <span class="badge badge-primary">
-                  <%=  inf.out_lorrydriver_ack.pic %>
-
-                </span>
-
-                      <% else %>
-
-                        <% end %>
-                </td>
-                <td>
-                  <%= if inf.out_lorrydriver_start != nil do  %>
-
-                    <%=  inf.out_lorrydriver_start.datetime |> Timex.shift(hours: 8) |> Timex.format!( "%d/%m %H:%M", :strftime)%>
-
-                      <span class="badge badge-primary">
-                  <%=  inf.out_lorrydriver_start.pic %>
-
-                </span>
-
-                      <% else %>
-
-                        <% end %>
-                </td>
-                <td>
-                  <%= if inf.out_lorrydriver_end != nil do  %>
-
-                    <%=  inf.out_lorrydriver_end.datetime |> Timex.shift(hours: 8) |> Timex.format!( "%d/%m %H:%M", :strftime)%>
-
-                      <span class="badge badge-primary">
-                  <%=  inf.out_lorrydriver_end.pic %>
-
-                </span>
-
-                      <% else %>
-
-                        <% end %>
-                </td>
               </tr>
-
               <% end %>
           </tbody>
         </table>
+    
 
-      </div>
     </div>
   </div>
-
 </div>
 <div class="row">
-  <div class="col-lg-12">
-
-    <h2>Listing Activities</h2>
-
-    <table class="table" id="activity">
-      <thead>
-        <tr>
-          <th>Job No</th>
-          <th>Created by</th>
-          <th>Type</th>
-          <th>Message</th>
-          <th>Location</th>
-          <th>Container</th>
-          <th>Trailer</th>
-          <th>Type</th>
-          <th>Mode</th>
-
-          <th>At</th>
-
-        </tr>
-      </thead>
-      <tbody>
-        <%= for activity <- @activities do %>
-          <tr>
-            <td>
-              <%= activity.job_no %>
-            </td>
-            <td>
-              <%= activity.created_by %>
-            </td>
-            <td>
-              <%= activity.activity_type %>
-            </td>
-            <td>
-              <%= activity.message %>
-
-            </td>
-            <td>
-              <%= activity.location %>
-            </td>
-            <td>
-              <%= activity.container_name %>
-            </td>
-            <td>
-              <%= activity.trailer_no %>
-            </td>
-            <td>
-              <%= activity.delivery_type %>
-            </td>
-            <td>
-              <%= activity.delivery_mode %>
-            </td>
-
-            <td>
-              <%= activity.inserted_at |> Timex.shift(hours: 8) |> Timex.format!( "%Y-%m-%d %I:%M %P", :strftime) %>
-            </td>
-
-          </tr>
-          <% end %>
-      </tbody>
-    </table>
-
-    <span><%= link "New Activity", to: activity_path(@conn, :new) %></span>
+  <div class="col-sm-5">
+    <div class="card card-primary">
+      <div class="card-header bg-info">
+        Containers
+      </div>
+  
+        
+ 
+      <table class="table-hover table-bordered" style="font-size: 10px;" id="cont">
+          <thead>
+            <tr>
+              <th>Job no</th>
+           
+              <th>Name</th>
+              <th>Status</th>
+              <th>Trailers</th>
+              <th>Return Depot</th>
+                 <th>Driver</th>
+            
+            </tr>
+          </thead>
+          <tbody>
+            <%= for container <- @containers do %>
+              <tr>
+                <td>
+                  <%= container.job_no %>
+                </td>
+               
+                <td>
+                  <%= container.name %>
+                </td>
+                <td>
+                  <%= container.status %>
+                </td>
+                <td>
+                  <%= container.trailer_no %>
+                </td>
+                <td>
+                  <%= container.return_depot %>
+                </td>
+                <td>
+                  <%= container.driver_name %>
+                </td>
+              
+              </tr>
+              <% end %>
+          </tbody>
+        </table>
+            
+    </div>
   </div>
 </div>
 <script type="text/javascript">
-  $(document).ready(function() {
-    $("table#activity").DataTable();
-  })
+  $("table#main").DataTable( {"dom": '<"card-body"rt><if>'});
+ $("table#cont").DataTable( {"dom": '<"card-body"rt><if>'});
 </script>

@@ -34,7 +34,12 @@ defmodule TransporterWeb.PageController do
             job_no: j.job_no,
             vessel_name: j.vessel_name,
             voyage_no: j.voyage_no,
-            container: c.name
+            container: c.name,
+            customer: j.customer,
+            pic: j.created_by,
+            eta: j.eta,
+            etb: j.atb,
+            dd: j.dd_date
           },
           order_by: [c.name]
         )
@@ -55,7 +60,8 @@ defmodule TransporterWeb.PageController do
       |> Enum.map(fn x -> Map.put(x, :out_lorrydriver_end, find_act("out_lorrydriver_end", x)) end)
 
     activities = Logistic.list_activities()
-    render(conn, "index.html", activities: activities, info: info)
+    containers = Logistic.list_containers()
+    render(conn, "index.html", activities: activities, info: info, containers: containers)
   end
 
   def find_act(type, x) do
@@ -159,7 +165,7 @@ defmodule TransporterWeb.PageController do
                 )
 
               us = Repo.get_by(Logistic.UserJob, job_id: job.id, user_id: user.id)
-              names = job.containers |> String.split(",")
+              names = job.containers |> String.split(",") |> Enum.map(fn x -> String.trim(x) end)
               containers = Repo.all(from(c in Container, where: c.name in ^names))
 
               res2 =
@@ -195,7 +201,7 @@ defmodule TransporterWeb.PageController do
 
               us = Repo.get_by(Logistic.UserJob, job_id: job.id, user_id: user.id)
               # when all become pending checking then only update...
-              names = job.containers |> String.split(",")
+              names = job.containers |> String.split(",") |> Enum.map(fn x -> String.trim(x) end)
               containers = Repo.all(from(c in Container, where: c.name in ^names))
 
               res10 =
@@ -282,6 +288,15 @@ defmodule TransporterWeb.PageController do
 
               res2 = Logistic.update_container(container, %{status: "Arrived Destination"})
 
+              usj =
+                Repo.get_by(
+                  UserJob,
+                  user_id: user.id,
+                  job_id: job.id,
+                  route_id: params["route_id"]
+                )
+
+              Logistic.update_user_job(usj, %{status: "done"})
               {:ok, act}
 
             "trailer" ->
@@ -329,7 +344,13 @@ defmodule TransporterWeb.PageController do
 
       "acceptJob" ->
         user = Repo.get_by(User, username: params["username"])
-        job = Repo.get_by(Job, job_no: params["job_no"])
+
+        job =
+          if user.user_level == "LorryDriver" do
+            Repo.get_by(Job, job_no: String.split(params["job_no"], "_") |> hd())
+          else
+            Repo.get_by(Job, job_no: params["job_no"])
+          end
 
         message =
           if user.user_level == "LorryDriver" do
@@ -358,9 +379,32 @@ defmodule TransporterWeb.PageController do
             user
           )
 
-        res = Repo.all(from(u in UserJob, where: u.user_id == ^user.id and u.job_id == ^job.id))
-        usj = List.first(res)
-        Logistic.update_user_job(usj, %{status: "pending report"})
+        route =
+          if user.user_level == "LorryDriver" do
+            Repo.get_by(ContainerRoute, id: String.split(params["job_no"], "_") |> List.last())
+          else
+            nil
+          end
+
+        if route != nil do
+          Logistic.update_container_route(route, %{driver_id: user.id, driver: user.username})
+
+          res =
+            Repo.all(
+              from(
+                u in UserJob,
+                where: u.user_id == ^user.id and u.job_id == ^job.id and u.route_id == ^route.id
+              )
+            )
+
+          usj = List.first(res)
+          Logistic.update_user_job(usj, %{status: "pending report", route_id: route.id})
+        else
+          res = Repo.all(from(u in UserJob, where: u.user_id == ^user.id and u.job_id == ^job.id))
+          usj = List.first(res)
+          Logistic.update_user_job(usj, %{status: "pending report"})
+        end
+
         # if some one cant finish the job... we dont have a handling for this situation yet.
         # its expected the users finish the job when they acknowledge it.
     end

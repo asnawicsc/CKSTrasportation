@@ -4,7 +4,7 @@ defmodule TransporterWeb.LocationChannel do
   alias Transporter.Settings
   alias Transporter.Settings.User
   alias Transporter.Logistic
-  alias Transporter.Logistic.{Activity, Job, UserJob, Image, Container}
+  alias Transporter.Logistic.{Activity, Job, UserJob, Image, Container, ContainerRoute}
 
   def join("location:" <> user_id, payload, socket) do
     if authorized?(payload, user_id) do
@@ -62,7 +62,7 @@ defmodule TransporterWeb.LocationChannel do
 
       for j <- jobs do
         # find out the pending containers
-        names = j.containers |> String.split(",")
+        names = j.containers |> String.split(",") |> Enum.map(fn x -> String.trim(x) end)
         containers = Repo.all(from(c in Container, where: c.name in ^names))
 
         pending_containers =
@@ -77,18 +77,47 @@ defmodule TransporterWeb.LocationChannel do
           |> Enum.map(fn x -> x.name end)
           |> Enum.join(",")
 
-        message = %{
-          job_no: j.job_no,
-          description: j.description,
-          insertedAt:
-            DateTime.from_naive!(j.inserted_at, "Etc/UTC") |> DateTime.to_unix(:millisecond),
-          pendingContainers: pending_containers,
-          completedContainers: "",
-          by: j.last_by
-        }
+        usjs = Repo.all(from(u in UserJob, where: u.user_id == ^user.id and u.job_id == ^j.id))
 
-        IO.inspect(message)
-        broadcast(socket, "new_request", message)
+        for usj <- usjs do
+          desc =
+            if user.user_level == "LorryDriver" && usj.route_id != nil do
+              route = Repo.get(ContainerRoute, usj.route_id)
+
+              if route != nil do
+                "#{route.from} to #{route.to}"
+              else
+                "route not set"
+              end
+            else
+              j.description
+            end
+
+          jobno =
+            if user.user_level == "LorryDriver" && usj.route_id != nil do
+              "#{j.job_no}_#{usj.route_id}"
+            else
+              j.job_no
+            end
+
+          jj = Repo.get(UserJob, usj.id)
+
+          if jj.status == "pending accept" do
+            message = %{
+              job_no: jobno,
+              description: desc,
+              insertedAt:
+                DateTime.from_naive!(j.inserted_at, "Etc/UTC") |> DateTime.to_unix(:millisecond),
+              pendingContainers: pending_containers,
+              completedContainers: "",
+              by: j.last_by,
+              route_id: usj.route_id
+            }
+
+            IO.inspect(message)
+            broadcast(socket, "new_request", message)
+          end
+        end
       end
 
       job_ids2 =
@@ -105,8 +134,13 @@ defmodule TransporterWeb.LocationChannel do
       IO.inspect(jobs2)
 
       for j <- jobs2 do
-        names = j.containers |> String.split(",")
+        names = j.containers |> String.split(",") |> Enum.map(fn x -> String.trim(x) end)
         containers = Repo.all(from(c in Container, where: c.name in ^names))
+
+        IO.puts("containers\n")
+        IO.inspect(names)
+        IO.inspect(containers)
+        IO.puts(" \n")
 
         pending_containers =
           case user.user_level do
@@ -121,6 +155,7 @@ defmodule TransporterWeb.LocationChannel do
               containers
           end
 
+        IO.puts("pending containers \n\n\n")
         IO.inspect(pending_containers)
 
         pending_containers =
@@ -152,19 +187,62 @@ defmodule TransporterWeb.LocationChannel do
           |> Enum.map(fn x -> x.name end)
           |> Enum.join(",")
 
-        message = %{
-          job_no: j.job_no,
-          description: j.description,
-          insertedAt:
-            DateTime.from_naive!(j.inserted_at, "Etc/UTC") |> DateTime.to_unix(:millisecond),
-          pendingContainers: pending_containers,
-          completedContainers: completed_containers,
-          pickedContainers: pickedContainers
-        }
+        usjs = Repo.all(from(u in UserJob, where: u.user_id == ^user.id and u.job_id == ^j.id))
 
-        IO.inspect(message)
+        for usj <- usjs do
+          if user.user_level == "LorryDriver" && usj.route_id != nil do
+            route = Repo.get(ContainerRoute, usj.route_id)
 
-        broadcast(socket, "accepted_request", message)
+            desc =
+              if route != nil do
+                "#{route.from} to #{route.to}"
+              else
+                "route not set"
+              end
+
+            jobno =
+              if user.user_level == "LorryDriver" && route != nil do
+                "#{j.job_no}_#{route.id}"
+              else
+                j.job_no
+              end
+
+            jj = Repo.get(UserJob, usj.id)
+
+            if jj.status == "pending report" do
+              message = %{
+                job_no: jobno,
+                description: desc,
+                insertedAt:
+                  DateTime.from_naive!(j.inserted_at, "Etc/UTC") |> DateTime.to_unix(:millisecond),
+                pendingContainers: Repo.get(Container, route.container_id).name,
+                completedContainers: completed_containers,
+                pickedContainers: pickedContainers
+              }
+
+              IO.inspect(message)
+
+              broadcast(socket, "accepted_request", message)
+            end
+          else
+          end
+
+          if user.user_level != "LorryDriver" do
+            message = %{
+              job_no: j.job_no,
+              description: "",
+              insertedAt:
+                DateTime.from_naive!(j.inserted_at, "Etc/UTC") |> DateTime.to_unix(:millisecond),
+              pendingContainers: pending_containers,
+              completedContainers: completed_containers,
+              pickedContainers: pickedContainers
+            }
+
+            IO.inspect(message)
+
+            broadcast(socket, "accepted_request", message)
+          end
+        end
       end
 
       job_ids3 =
@@ -172,21 +250,33 @@ defmodule TransporterWeb.LocationChannel do
           from(
             u in UserJob,
             where: u.user_id == ^user.id and u.status == ^"done",
-            select: u.job_id
+            select: {u.job_id, u.route_id}
           )
         )
 
-      jobs3 = Repo.all(from(j in Job, where: j.id in ^job_ids3))
+      jobs3 = Repo.all(from(j in Job, where: j.id in ^Enum.map(job_ids3, fn x -> elem(x, 0) end)))
       # find out the pending containers
       IO.inspect(jobs3)
 
       for j <- jobs3 do
         # find out the pending containers
-        names = j.containers |> String.split(",")
+        names = j.containers |> String.split(",") |> Enum.map(fn x -> String.trim(x) end)
         containers = Repo.all(from(c in Container, where: c.name in ^names))
 
+        route_id =
+          Enum.filter(job_ids3, fn x -> elem(x, 0) == j.id end) |> List.first() |> elem(1)
+
+        route = Repo.get(ContainerRoute, route_id)
+
+        jobno =
+          if user.user_level == "LorryDriver" && route != nil do
+            "#{j.job_no}_#{route.id}"
+          else
+            j.job_no
+          end
+
         message = %{
-          job_no: j.job_no,
+          job_no: jobno,
           description: j.description,
           insertedAt:
             DateTime.from_naive!(j.updated_at, "Etc/UTC") |> DateTime.to_unix(:millisecond),

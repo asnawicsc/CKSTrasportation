@@ -72,14 +72,14 @@
    <script src="/js/app.js"></script>
 </head>
 
-<body>
+<body class="layout-h">
    <div class="wrapper">
     <%= render("top_navbar.html")%>
     <%= render("flash.html", conn: @conn)%>
 
 
       <!-- sidebar-->
-    <%= render("sidebar.html", conn: @conn)%>
+    <% render("sidebar.html", conn: @conn)%>
 
       <!-- offsidebar-->
     <%= render("offsidebar.html")%>
@@ -88,10 +88,9 @@
       <section class="section-container disable-select" >
          <!-- Page content-->
          <div class="content-wrapper">
-            <div class="row">
-               <div class="col-xl-12">
+         
             <%= render @view_module, @view_template, assigns %>
-         </div></div>
+        
          </div>
       </section>
       <!-- Page footer-->
