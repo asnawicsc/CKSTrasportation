@@ -16,8 +16,35 @@ alias Transporter.Settings
 alias Transporter.Settings.User
 alias Transporter.Logistic
 alias Transporter.Logistic.{Activity, Job, UserJob, Container}
-
+Repo.delete_all(User)
 Repo.delete_all(UserJob)
 Repo.delete_all(Job)
 Repo.delete_all(Activity)
 Repo.delete_all(Container)
+
+Transporter.Settings.create_users(%{
+  username: "peter",
+  email: "p@1.com",
+  user_type: "Staff",
+  user_level: "Forwarder",
+  pin: "1231",
+  password: "1231"
+})
+
+Transporter.Settings.create_users(%{
+  username: "damien",
+  email: "d@1.com",
+  user_type: "Staff",
+  user_level: "Gateman",
+  pin: "1232",
+  password: "1232"
+})
+
+Transporter.Settings.create_users(%{
+  username: "elis",
+  email: "e@1.com",
+  user_type: "Staff",
+  user_level: "LorryDriver",
+  pin: "1233",
+  password: "1233"
+})

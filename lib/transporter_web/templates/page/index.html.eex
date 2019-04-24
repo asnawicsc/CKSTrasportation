@@ -1,7 +1,7 @@
 <div class="row">
   <div class="col-sm-12">
-    <div class="card card-primary">
-      <div class="card-header bg-primary">Info</div>
+    <div class="card border-primary">
+   
     
 
         <table class="table-hover table-bordered" id="main" style="font-size: 10px;">
@@ -136,10 +136,8 @@
 </div>
 <div class="row">
   <div class="col-sm-5">
-    <div class="card card-primary">
-      <div class="card-header bg-info">
-        Containers
-      </div>
+    <div class="card  border-info">
+    
   
         
  

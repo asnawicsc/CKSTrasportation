@@ -351,4 +351,30 @@ defmodule Transporter.Settings do
   def change_delivery_location(%DeliveryLocation{} = delivery_location) do
     DeliveryLocation.changeset(delivery_location, %{})
   end
+
+  def create_users(user_params \\ nil) do
+    user_params =
+      if user_params == nil do
+        user_params = %{
+          username: "cks_admin",
+          email: "admin@1.com",
+          user_type: "Staff",
+          user_level: "Admin",
+          pin: "1234",
+          password: "1234"
+        }
+      else
+        user_params
+      end
+
+    user_params =
+      Map.put(
+        user_params,
+        :crypted_password,
+        Comeonin.Bcrypt.hashpwsalt(user_params.password)
+      )
+      |> Map.put(:password, nil)
+
+    create_user(user_params)
+  end
 end
