@@ -58,10 +58,47 @@ defmodule TransporterWeb.PageController do
         Map.put(x, :out_lorrydriver_start, find_act("out_lorrydriver_start", x))
       end)
       |> Enum.map(fn x -> Map.put(x, :out_lorrydriver_end, find_act("out_lorrydriver_end", x)) end)
+      |> Enum.map(fn x ->
+        Map.put(x, :in_lorrydriver_start, find_act("in_lorrydriver_start", x))
+      end)
+      |> Enum.map(fn x -> Map.put(x, :in_lorrydriver_end, find_act("in_lorrydriver_end", x)) end)
+      |> Enum.map(fn x -> Map.put(x, :bal, get_last_day(x.dd, x.job_id)) end)
 
     activities = Logistic.list_activities()
     containers = Logistic.list_containers()
-    render(conn, "index.html", activities: activities, info: info, containers: containers)
+    users = Settings.list_users() |> Enum.filter(fn x -> x.user_level == "LorryDriver" end)
+
+    render(
+      conn,
+      "index.html",
+      activities: activities,
+      info: info,
+      users: users,
+      containers: containers
+    )
+  end
+
+  def get_last_day(dd_date, job_id) do
+    latest =
+      Repo.all(
+        from(
+          a in Activity,
+          where: a.job_id == ^job_id,
+          select: a.inserted_at,
+          order_by: [a.inserted_at]
+        )
+      )
+      |> List.last()
+
+    seconds =
+      DateTime.diff(
+        DateTime.from_naive!(dd_date, "Etc/UTC"),
+        DateTime.from_naive!(latest, "Etc/UTC"),
+        1
+      )
+
+    Timex.Duration.from_seconds(seconds) |> Timex.format_duration(:humanized) |> String.split(",")
+    |> hd()
   end
 
   def find_act(type, x) do
@@ -69,7 +106,9 @@ defmodule TransporterWeb.PageController do
       # "lorrydriver_assigned",
       # "out_lorrydriver_ack",
       "out_lorrydriver_start",
-      "out_lorrydriver_end"
+      "out_lorrydriver_end",
+      "in_lorrydriver_start",
+      "in_lorrydriver_end"
     ]
 
     gate = ["gateman_clear"]
@@ -106,6 +145,27 @@ defmodule TransporterWeb.PageController do
     IO.inspect(params)
 
     case params["scope"] do
+      "route_used" ->
+        res =
+          Repo.all(
+            from(
+              cr in ContainerRoute,
+              left_join: c in Container,
+              on: c.id == cr.container_id,
+              where: cr.container_id == ^params["cont_id"],
+              select: %{
+                to: cr.to,
+                from: cr.from
+              }
+            )
+          )
+
+        json_map = Poison.encode!(res)
+
+        conn
+        |> put_resp_content_type("application/json")
+        |> send_resp(200, json_map)
+
       "login" ->
         res = Repo.all(from(u in User, where: u.pin == ^params["pin"]))
 
@@ -266,6 +326,21 @@ defmodule TransporterWeb.PageController do
               {:ok, act}
 
             "arrive" ->
+              route = Repo.get(ContainerRoute, params["route_id"])
+
+              type =
+                if route != nil do
+                  loc = Repo.get_by(DeliveryLocation, name: route.to)
+
+                  if loc.zone == "Home" do
+                    "in_lorrydriver_end"
+                  else
+                    "out_lorrydriver_end"
+                  end
+                else
+                  "error no route found..."
+                end
+
               {:ok, act} =
                 Logistic.create_activity(
                   %{
@@ -280,7 +355,7 @@ defmodule TransporterWeb.PageController do
                     trailer_no: params["trailer"],
                     delivery_type: params["type"],
                     delivery_mode: params["mode"],
-                    activity_type: "out_lorrydriver_end"
+                    activity_type: type
                   },
                   job,
                   user
@@ -303,6 +378,21 @@ defmodule TransporterWeb.PageController do
               message =
                 "#{user.username} has pickup container #{container.name} for #{job.job_no}"
 
+              route = Repo.get(ContainerRoute, params["route_id"])
+
+              type =
+                if route != nil do
+                  loc = Repo.get_by(DeliveryLocation, name: route.to)
+
+                  if loc.zone == "Home" do
+                    "in_lorrydriver_start"
+                  else
+                    "out_lorrydriver_start"
+                  end
+                else
+                  "error no route found..."
+                end
+
               {:ok, act} =
                 Logistic.create_activity(
                   %{
@@ -316,7 +406,7 @@ defmodule TransporterWeb.PageController do
                     trailer_no: params["trailer"],
                     delivery_type: params["type"],
                     delivery_mode: params["mode"],
-                    activity_type: "out_lorrydriver_start"
+                    activity_type: type
                   },
                   job,
                   user

@@ -18,6 +18,11 @@ defmodule Transporter.Settings.User do
     field(:phone1, :string)
     field(:phone2, :string)
     field(:alias, :string)
+    field(:insurance_exp, :date)
+    field(:inspection, :date)
+    field(:road_tax_exp, :date)
+    field(:truck_type, :string, default: "Prime Mover")
+    field(:truck_no, :string)
     timestamps()
   end
 
@@ -25,6 +30,11 @@ defmodule Transporter.Settings.User do
   def changeset(user, attrs) do
     user
     |> cast(attrs, [
+      :truck_no,
+      :insurance_exp,
+      :road_tax_exp,
+      :inspection,
+      :truck_type,
       :alias,
       :phone1,
       :phone2,

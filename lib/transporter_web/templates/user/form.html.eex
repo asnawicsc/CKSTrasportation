@@ -1,45 +1,112 @@
 <%= form_for @changeset, @action, fn f -> %>
-<%= if @changeset.action do %>
-<div class="alert alert-danger">
-  <p>Oops, something went wrong! Please check the errors below.</p>
-</div>
-<% end %>
-<div class="form-group">
-  <%= label f, :username, class: "control-label" %>
-  <%= text_input f, :username, class: "form-control" %>
-  <%= error_tag f, :username %>
-</div>
-<div class="form-group">
-  <%= label f, :pin, class: "control-label" %>
-  <%= text_input f, :pin, class: "form-control" %>
-  <%= error_tag f, :pin %>
-</div>
-<div class="form-group">
-  <%= label f, :password, class: "control-label" %>
-  <%= text_input f, :password, class: "form-control" %>
-  <%= error_tag f, :password %>
-</div>
+  <%= if @changeset.action do %>
+    <div class="alert alert-danger">
+      <p>Oops, something went wrong! Please check the errors below.</p>
+    </div>
+    <% end %>
 
-<div class="form-group">
-  <%= label f, :user_type, class: "control-label" %>
-  <%= select f, :user_type, [{"Staff", "Staff"}, {"Admin", "Admin"}], class: "form-control" %>
-  <%= error_tag f, :user_type %>
-</div>
+      <div class="row">
+        <div class="col-lg-4">
+          <div class="form-group">
+            <%= label f, :username, class: "control-label" %>
+              <%= text_input f, :username, class: "form-control" %>
+                <%= error_tag f, :username %>
+          </div>
+          <div class="form-group">
+            <%= label f, :pin, class: "control-label" %>
+              <%= text_input f, :pin, class: "form-control" %>
+                <%= error_tag f, :pin %>
+          </div>
+          <div class="form-group">
+            <%= label f, :password, class: "control-label" %>
+              <%= text_input f, :password, class: "form-control" %>
+                <%= error_tag f, :password %>
+          </div>
 
-<div class="form-group">
-  <%= label f, :user_level, class: "control-label" %>
-  <%= select f, :user_level, [{"Forwarder", "Forwarder"}, {"Gateman", "Gateman"}, {"LorryDriver", "LorryDriver"}, {"Supervisor", "Supervisor"}], class: "form-control" %>
-  <%= error_tag f, :user_level %>
-</div>
+          <div class="form-group">
+            <%= label f, :user_type, class: "control-label" %>
+              <%= select f, :user_type, [{"Staff", "Staff"}, {"Admin", "Admin"}], class: "form-control" %>
+                <%= error_tag f, :user_type %>
+          </div>
+
+          <div class="form-group">
+            <%= label f, :user_level, class: "control-label" %>
+              <%= select f, :user_level, [{"Forwarder", "Forwarder"}, {"Gateman", "Gateman"}, {"LorryDriver", "LorryDriver"}, {"Supervisor", "Supervisor"}], class: "form-control" %>
+                <%= error_tag f, :user_level %>
+          </div>
+
+          <div class="form-group">
+            <%= label f, :email, class: "control-label" %>
+              <%= text_input f, :email, class: "form-control" %>
+                <%= error_tag f, :email %>
+          </div>
+        </div>
+        <div class="col-lg-4">
+          <div class="form-group">
+            <%= label f, :locations, class: "control-label" %>
+              <%= text_input f, :locations, class: "form-control" %>
+                <%= error_tag f, :locations %>
+          </div>
+          <div class="form-group">
+            <%= label f, :rates, class: "control-label" %>
+              <%= text_input f, :rates, class: "form-control" %>
+                <%= error_tag f, :rates %>
+          </div>
+          <div class="form-group">
+            <%= label f, :ic_no, class: "control-label" %>
+              <%= text_input f, :ic_no, class: "form-control" %>
+                <%= error_tag f, :ic_no %>
+          </div>
 
 
+       
 
-<div class="form-group">
-  <%= label f, :email, class: "control-label" %>
-  <%= text_input f, :email, class: "form-control" %>
-  <%= error_tag f, :email %>
-</div>
-<div class="form-group">
-  <%= submit "Submit", class: "btn btn-primary" %>
-</div>
-<% end %>
+          <div class="form-group">
+            <%= label f, :phone1, class: "control-label" %>
+              <%= text_input f, :phone1, class: "form-control" %>
+                <%= error_tag f, :phone1 %>
+          </div>
+          <div class="form-group">
+            <%= label f, :phone2, class: "control-label" %>
+              <%= text_input f, :phone2, class: "form-control" %>
+                <%= error_tag f, :phone2 %>
+          </div>
+           <div class="form-group">
+            <%= label f, :company_id, class: "control-label" %>
+              <%= select f, :company_id, [{"Resertech", 0 }], class: "form-control" %>
+                <%= error_tag f, :company_id %>
+          </div>
+        </div>
+        <div class="col-lg-4">
+          <div class="form-group">
+            <%= label f, :truck_no, class: "control-label" %>
+              <%= text_input f, :truck_no, class: "form-control" %>
+                <%= error_tag f, :truck_no %>
+          </div>
+          <div class="form-group">
+            <%= label f, :truck_type, class: "control-label" %>
+              <%= select f, :truck_type, ["Prime Mover", "Trailer", "Side Loader"], class: "form-control" %>
+                <%= error_tag f, :truck_type %>
+          </div>
+          <div class="form-group">
+            <%= label f, "Insurance", class: "control-label" %><br>
+              <%= date_select f, :insurance_exp, class: "form-control" %>
+                <%= error_tag f, :insurance_exp %>
+          </div>
+          <div class="form-group">
+            <%= label f, "Inspection", class: "control-label" %><br>
+              <%= date_select f, :inspection, class: "form-control" %>
+                <%= error_tag f, :inspection %>
+          </div>
+          <div class="form-group">
+            <%= label f, "Road Tax", class: "control-label" %><br>
+              <%= date_select f, :road_tax_exp, class: "form-control" %>
+                <%= error_tag f, :road_tax_exp %>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <%= submit "Submit", class: "btn btn-primary" %>
+      </div>
+      <% end %>
