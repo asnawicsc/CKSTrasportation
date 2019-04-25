@@ -1,11 +1,19 @@
+<style type="text/css">
+  .large {
+     width: 1600px;
+  }
+  .small {
+     width: 600px;
+  }
+</style>
 <div class="row">
-  <div class="col-sm-12">
-    <div class="card border-primary">
-      <div >
-        
-<div class="badge badge-primary">Overview</div>
+  <div class="col-sm-12"  id="main" >
+    <div class="card border-primary" style="overflow-x: scroll;">
+      <div>
+
+        <div class="badge badge-primary">Overview</div>
       </div>
-      <table class="table-hover table-bordered" id="main" style="font-size: 10px;">
+      <table class="table-hover table-bordered large" id="main" style="font-size: 10px;">
 
         <thead>
           <tr>
@@ -17,32 +25,31 @@
             <th>PIC</th>
             <th>ETA</th>
             <th>ETB</th>
-            <th>PIC</th>
-            <th>R'ced DOC</th>
-            <th>Days</th>
-            <th>Cust' Decl'</th>
-            <th>Days</th>
-            <th>Doc Surr<br>at Gate</th>
+            <th class="detail">PIC</th>
+            <th class="detail">R'ced DOC</th>
+            <th class="detail">Days</th>
+            <th class="detail">Cust' Decl'</th>
+            <th class="detail">Days</th>
+            <th class="detail">Doc Surr<br>at Gate</th>
 
-            <th>Deliv'<br>Type</th>
-            <th>Cont<br>Out Gate</th>
+            <th class="detail">Deliv'<br>Type</th>
+            <th class="detail">Cont<br>Out Gate</th>
 
-            <th>Days</th>
-            <th>Driver</th>
+            <th class="detail">Days</th>
+            <th class="detail">Driver</th>
 
-            <th>Transfer</th>
-            <th>Transit</th>
-            <th>Dest</th>
-            <th>Returned</th>
-
+            <th class="detail">Transfer</th>
+            <th class="detail">Transit</th>
+            <th class="detail" >Dest</th>
+            <th class="detail">Returned</th>
 
             <th>DD</th>
           </tr>
         </thead>
         <tbody>
           <%= for inf <- @info do %>
-            <tr>
-              <td>
+            <tr class="job">
+              <td class="show_job" id="<%= inf.job_id %>">
                 <%= inf.job_no %>
               </td>
               <td>
@@ -66,7 +73,7 @@
               <td>
                 <%= inf.etb |> Timex.shift(hours: 8) |> Timex.format!( "%d/%m", :strftime)%>
               </td>
-              <td>
+              <td class="detail">
                 <%= if inf.forwarder_assigned != nil do  %>
                   <%=  inf.forwarder_assigned.pic %>
 
@@ -74,7 +81,7 @@
 
                       <% end %>
               </td>
-              <td>
+              <td class="detail">
                 <%= if inf.forwarder_assigned != nil do  %>
 
                   <%=  inf.forwarder_assigned.datetime |> Timex.shift(hours: 8) |> Timex.format!( "%d/%m %H:%M", :strftime)%>
@@ -83,8 +90,8 @@
 
                       <% end %>
               </td>
-              <td style="color: red;">0</td>
-              <td>
+              <td class="detail" style="color: red;">0</td>
+              <td class="detail">
                 <%= if inf.forwarder_clear != nil do  %>
 
                   <%=  inf.forwarder_clear.datetime |> Timex.shift(hours: 8) |> Timex.format!( "%d/%m %H:%M", :strftime)%>
@@ -93,8 +100,8 @@
 
                       <% end %>
               </td>
-              <td style="color: red;">0</td>
-              <td>
+              <td class="detail" style="color: red;">0</td>
+              <td class="detail">
                 <%= if inf.gateman_assigned != nil do  %>
 
                   <%=  inf.gateman_assigned.datetime |> Timex.shift(hours: 8) |> Timex.format!( "%d/%m %H:%M", :strftime)%>
@@ -104,8 +111,8 @@
                       <% end %>
               </td>
 
-              <td>NT</td>
-              <td>
+              <td class="detail">NT</td>
+              <td class="detail">
                 <%= if inf.out_lorrydriver_start != nil do  %>
 
                   <%=  inf.out_lorrydriver_start.datetime |> Timex.shift(hours: 8) |> Timex.format!( "%d/%m %H:%M", :strftime)%>
@@ -114,8 +121,8 @@
 
                       <% end %>
               </td>
-              <td style="color: red;">0</td>
-              <td>
+              <td class="detail" style="color: red;">0</td>
+              <td class="detail">
                 <%= if inf.out_lorrydriver_start != nil do  %>
 
                   <%=  inf.out_lorrydriver_start.pic %>
@@ -125,36 +132,36 @@
                       <% end %>
               </td>
 
+              <td class="detail">
+                <%= if inf.out_lorrydriver_start != nil do  %>
+                  <%=  inf.out_lorrydriver_start.datetime |> Timex.shift(hours: 8) |> Timex.format!( "%d/%m %H:%M", :strftime)%>
+                    <% else %>
+                      <% end %>
+              </td>
+              <td class="detail">
+                <%= if inf.out_lorrydriver_end != nil do  %>
+                  <%=  inf.out_lorrydriver_end.datetime |> Timex.shift(hours: 8) |> Timex.format!( "%d/%m %H:%M", :strftime)%>
+                    <% else %>
+                      <% end %>
+              </td>
+              <td class="detail">
+                <%= if inf.in_lorrydriver_start != nil do  %>
+                  <%=  inf.in_lorrydriver_start.datetime |> Timex.shift(hours: 8) |> Timex.format!( "%d/%m %H:%M", :strftime)%>
+                    <% else %>
+                      <% end %>
+              </td>
+              <td class="detail">
+                <%= if inf.in_lorrydriver_end != nil do  %>
+                  <%=  inf.in_lorrydriver_end.datetime |> Timex.shift(hours: 8) |> Timex.format!( "%d/%m %H:%M", :strftime)%>
+                    <% else %>
+                      <% end %>
+              </td>
 
               <td>
-                  <%= if inf.out_lorrydriver_start != nil do  %>
-                    <%=  inf.out_lorrydriver_start.datetime |> Timex.shift(hours: 8) |> Timex.format!( "%d/%m %H:%M", :strftime)%>
-                      <% else %>
-                        <% end %>
-                </td>
-                 <td>
-                  <%= if inf.out_lorrydriver_end != nil do  %>
-                    <%=  inf.out_lorrydriver_end.datetime |> Timex.shift(hours: 8) |> Timex.format!( "%d/%m %H:%M", :strftime)%>
-                      <% else %>
-                        <% end %>
-                </td>
-                <td>
-                  <%= if inf.in_lorrydriver_start != nil do  %>
-                    <%=  inf.in_lorrydriver_start.datetime |> Timex.shift(hours: 8) |> Timex.format!( "%d/%m %H:%M", :strftime)%>
-                      <% else %>
-                        <% end %>
-                </td>
-                 <td>
-                  <%= if inf.in_lorrydriver_end != nil do  %>
-                    <%=  inf.in_lorrydriver_end.datetime |> Timex.shift(hours: 8) |> Timex.format!( "%d/%m %H:%M", :strftime)%>
-                      <% else %>
-                        <% end %>
-                </td>
+                <span class="badge badge-info"><%= inf.bal %></span><br>
 
-              <td>        
-<span class="badge badge-info"><%= inf.bal %></span><br>
-
-                <%= inf.dd |> Timex.shift(hours: 8) |> Timex.format!( "%d/%m %H:%M", :strftime) %></td>
+                <%= inf.dd |> Timex.shift(hours: 8) |> Timex.format!( "%d/%m %H:%M", :strftime) %>
+              </td>
             </tr>
             <% end %>
         </tbody>
@@ -162,13 +169,16 @@
 
     </div>
   </div>
+  <div class="col-sm-6" id="show_job" style="display: none;" >
+    
+  </div>
 </div>
 <div class="row">
-  <div class="col-sm-8">
+  <div class="col-sm-6">
     <div class="card  border-info">
-<div >
-        
-<div class="badge badge-info">Container</div>
+      <div>
+
+        <div class="badge badge-info">Container</div>
       </div>
       <table class="table-hover table-bordered" style="font-size: 10px;" id="cont">
         <thead>
@@ -180,7 +190,7 @@
             <th>Trailers</th>
             <th>Return Depot</th>
             <th>Driver</th>
-            <th  style="width: 100px;">Routes Used</th>
+            <th style="width: 100px;">Routes Used</th>
 
           </tr>
         </thead>
@@ -207,7 +217,7 @@
                 <%= container.driver_name %>
               </td>
               <td id="<%= container.id %>" style="width: 100px;">
-            
+
                 <ol class="route_used" id="<%= container.id %>" style="padding-left: 0px;"></ol>
               </td>
 
@@ -220,9 +230,9 @@
   </div>
   <div class="col-sm-4">
     <div class="card  border-info">
-<div >
-        
-<div class="badge badge-info">Drivers</div>
+      <div>
+
+        <div class="badge badge-info">Drivers</div>
       </div>
       <table class="table-hover table-bordered" style="font-size: 10px;" id="drivers">
         <thead>
@@ -234,7 +244,6 @@
             <th>Insurance</th>
             <th>Road Tax</th>
             <th>Inspection </th>
-   
 
           </tr>
         </thead>
@@ -260,8 +269,6 @@
                 <%= user.inspection %>
               </td>
 
-            
-
             </tr>
             <% end %>
         </tbody>
@@ -272,38 +279,63 @@
 </div>
 <script type="text/javascript">
   $("table#main").DataTable({
-    "dom": '<"card-body"rtif>'
+    "dom": '<"card-body"rtif>',
+    "order": [[ 22, 'desc' ]]
   });
   $("table#cont").DataTable({
     "dom": '<"card-body"rtif>'
   });
-   $("table#drivers").DataTable({
+  $("table#drivers").DataTable({
     "dom": '<"card-body"rtif>'
   });
-$(document).ready(function(){
-  $("ol.route_used").each(function(){
-  var cont_id = $(this).attr("id")
-var html = $(this)
+  $(document).ready(function() {
+
+$(document).on("click", "td.show_job", function(){
+  var job_id = $(this).attr("id")
    $.ajax({
-      url: "/api/webhook",
-      dataType: "json",
-      data: {
-        scope: "route_used",
-        cont_id:cont_id,
-     
-      }
-    }).done(function(j) {
-      var result = j
-      console.log(j)
-    for (i in result) {
-html.append("<li><span class='badge badge-primary' style='font-size: 8px;'>"+result[i]["from"]+ "</span> - <span class='badge badge-danger' style='font-size: 8px;'>"+ result[i]["to"] +"</span></li>")
-           
+               url: "/api/webhook",
+            dataType: "json",
+            data: {
+              scope: "show_job",
+              job_id: job_id,
+       
             }
+          }).done(function(j) {
+            $("div#show_job").html(j);
+          });
 
+
+})
+    
+
+
+    $("ol.route_used").each(function() {
+      var cont_id = $(this).attr("id")
+      var html = $(this)
+      $.ajax({
+        url: "/api/webhook",
+        dataType: "json",
+        data: {
+          scope: "route_used",
+          cont_id: cont_id,
+        }
+      }).done(function(j) {
+        var result = j
+        console.log(j)
+        for (i in result) {
+          html.append("<li><span class='badge badge-primary' style='font-size: 8px;'>" + result[i]["from"] + "</span> - <span class='badge badge-danger' style='font-size: 8px;'>" + result[i]["to"] + "</span></li>")
+        }
+      })
     })
-})
+  })
+  $(document).on("dblclick", "tr.job", function() {
+    
+      
+      $("th.detail,td.detail").animate({width: "toggle", opacity: "toggle"});
+      $("div#main").toggleClass("col-sm-12 col-sm-6")
 
-})
+      $("table#main").toggleClass("large small")
 
-
+          $("div#show_job").animate({ opacity: "toggle"});
+    })
 </script>

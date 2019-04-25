@@ -145,6 +145,34 @@ defmodule TransporterWeb.PageController do
     IO.inspect(params)
 
     case params["scope"] do
+      "show_job" ->
+        job = Logistic.get_job!(params["job_id"])
+
+        activities =
+          Logistic.list_activities(job.id)
+          |> Enum.map(fn x ->
+            Map.put(x, :img_url, TransporterWeb.JobController.map_image(x.id))
+          end)
+          |> Enum.map(fn x ->
+            Map.put(x, :date, TransporterWeb.JobController.format_date(x.inserted_at))
+          end)
+          |> Enum.group_by(fn x -> x.date end)
+
+        html =
+          Phoenix.View.render_to_string(
+            TransporterWeb.JobView,
+            "show.html",
+            job: job,
+            activities: activities,
+            conn: conn
+          )
+
+        json_map = Poison.encode!(html)
+
+        conn
+        |> put_resp_content_type("application/json")
+        |> send_resp(200, json_map)
+
       "route_used" ->
         res =
           Repo.all(

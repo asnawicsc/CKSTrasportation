@@ -1,7 +1,6 @@
-<h2>Show Job</h2>
-<div class="row">
-  <div class="col-lg-4">
-    <ul>
+<div class="row" style="font-size: 10px;">
+  <div class="col-sm-4">
+    <ul style="list-style: none;">
 
       <li>
         <strong>Job no:</strong>
@@ -53,7 +52,7 @@
     <span><%= link "Back", to: job_path(@conn, :index) %></span>
 
   </div>
-  <div class="col-lg-6" style="height: 700px; overflow-y: scroll;">
+  <div class="col-sm-7" style="height: 500px; overflow-x: hidden; overflow-y: scroll;">
 
     <% dates = @activities |> Map.keys %>
       <ul class="timeline">
