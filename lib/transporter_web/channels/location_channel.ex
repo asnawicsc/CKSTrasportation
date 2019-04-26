@@ -215,7 +215,12 @@ defmodule TransporterWeb.LocationChannel do
                 description: desc,
                 insertedAt:
                   DateTime.from_naive!(j.inserted_at, "Etc/UTC") |> DateTime.to_unix(:millisecond),
-                pendingContainers: Repo.get(Container, route.container_id).name,
+                pendingContainers:
+                  if(
+                    pickedContainers == "",
+                    do: Repo.get(Container, route.container_id).name,
+                    else: ""
+                  ),
                 completedContainers: completed_containers,
                 pickedContainers: pickedContainers
               }

@@ -45,7 +45,8 @@ defmodule TransporterWeb.PageController do
         )
       )
       |> Enum.map(fn x -> Map.put(x, :forwarder_assign, find_act("forwarder_assign", x)) end)
-      |> Enum.map(fn x -> Map.put(x, :forwarder_assigned, find_act("forwarder_ack", x)) end)
+      |> Enum.map(fn x -> Map.put(x, :forwarder_assigned, find_act("forwarder_assigned", x)) end)
+      |> Enum.map(fn x -> Map.put(x, :forwarder_ack, find_act("forwarder_ack", x)) end)
       |> Enum.map(fn x -> Map.put(x, :forwarder_clear, find_act("forwarder_clear", x)) end)
       |> Enum.map(fn x -> Map.put(x, :gateman_assigned, find_act("gateman_assigned", x)) end)
       |> Enum.map(fn x -> Map.put(x, :gateman_ack, find_act("gateman_ack", x)) end)
@@ -66,7 +67,19 @@ defmodule TransporterWeb.PageController do
 
     activities = Logistic.list_activities()
     containers = Logistic.list_containers()
-    users = Settings.list_users() |> Enum.filter(fn x -> x.user_level == "LorryDriver" end)
+    user_data = Settings.list_users()
+    users = user_data |> Enum.filter(fn x -> x.user_level == "LorryDriver" end)
+    forwarders = user_data |> Enum.filter(fn x -> x.user_level == "Forwarder" end)
+
+    html =
+      Phoenix.View.render_to_string(
+        TransporterWeb.UserView,
+        "user_level.html",
+        users: forwarders,
+        conn: conn
+      )
+
+    locations = Settings.list_delivery_location()
 
     render(
       conn,
@@ -74,7 +87,8 @@ defmodule TransporterWeb.PageController do
       activities: activities,
       info: info,
       users: users,
-      containers: containers
+      containers: containers,
+      locations: locations
     )
   end
 
@@ -143,8 +157,26 @@ defmodule TransporterWeb.PageController do
 
   def webhook_get(conn, params) do
     IO.inspect(params)
+    user_data = Settings.list_users()
 
     case params["scope"] do
+      "get_users" ->
+        users = user_data |> Enum.filter(fn x -> x.user_level == params["level"] end)
+
+        html =
+          Phoenix.View.render_to_string(
+            TransporterWeb.UserView,
+            "user_level.html",
+            users: users,
+            conn: conn
+          )
+
+        json_map = Poison.encode!(html)
+
+        conn
+        |> put_resp_content_type("application/json")
+        |> send_resp(200, json_map)
+
       "show_job" ->
         job = Logistic.get_job!(params["job_id"])
 
@@ -180,10 +212,15 @@ defmodule TransporterWeb.PageController do
               cr in ContainerRoute,
               left_join: c in Container,
               on: c.id == cr.container_id,
+              left_join: u in User,
+              on: cr.driver_id == u.id,
               where: cr.container_id == ^params["cont_id"],
               select: %{
                 to: cr.to,
-                from: cr.from
+                from: cr.from,
+                driver: cr.driver,
+                truck: u.truck_type,
+                no: u.truck_no
               }
             )
           )
@@ -266,6 +303,93 @@ defmodule TransporterWeb.PageController do
 
               if Enum.count(rem) == 0 do
                 res = Logistic.update_user_job(us, %{status: "done"})
+              end
+
+              # assign to drivers
+              cr_res =
+                Repo.all(
+                  from(
+                    cr in ContainerRoute,
+                    left_join: d in DeliveryLocation,
+                    on: cr.from_id == d.id,
+                    where: cr.container_id == ^container.id and d.zone == "Home",
+                    select: {cr.driver_id, cr.id}
+                  )
+                )
+
+              if cr_res != [] do
+                user2 = Repo.get(User, elem(hd(cr_res), 0))
+
+                jobq = %{
+                  "job_id" => job.id,
+                  "user_id" => user2.id,
+                  "route_id" => elem(hd(cr_res), 1)
+                }
+
+                us =
+                  Repo.get_by(
+                    Logistic.UserJob,
+                    job_id: job.id,
+                    user_id: user2.id,
+                    route_id: elem(hd(cr_res), 1)
+                  )
+
+                if us == nil do
+                  jobq = Map.put(jobq, "status", "pending accept")
+                  {:ok, usj} = Logistic.create_user_job(jobq)
+
+                  {:ok, act2} =
+                    Logistic.create_activity(
+                      %{
+                        created_by: user.username,
+                        created_id: user.id,
+                        job_id: usj.job_id,
+                        message:
+                          "Assigned to #{user2.username}. Pending accept from #{user2.user_level}.",
+                        activity_type: "lorrydriver_assigned"
+                      },
+                      job,
+                      user
+                    )
+
+                  topic = "location:#{user2.username}"
+                  event = "new_request"
+
+                  desc =
+                    if user2.user_level == "LorryDriver" && elem(hd(cr_res), 1) != nil do
+                      route = Repo.get(ContainerRoute, elem(hd(cr_res), 1))
+
+                      if route != nil do
+                        "#{route.from} to #{route.to}"
+                      else
+                        "route not set"
+                      end
+                    else
+                      job.description
+                    end
+
+                  jobno =
+                    if user2.user_level == "LorryDriver" && elem(hd(cr_res), 1) != nil do
+                      "#{job.job_no}_#{elem(hd(cr_res), 1)}"
+                    else
+                      job.job_no
+                    end
+
+                  message = %{
+                    job_no: jobno,
+                    description: desc,
+                    insertedAt: Timex.now() |> DateTime.to_unix(:millisecond),
+                    pendingContainers: elem(res2, 1).name,
+                    completedContainers: "",
+                    by: act.created_by
+                  }
+
+                  TransporterWeb.Endpoint.broadcast(topic, event, message)
+                else
+                  # user job already exist?
+                end
+              else
+                # route wasn't assigned, then how?
               end
 
               {:ok, act}

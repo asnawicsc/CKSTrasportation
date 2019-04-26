@@ -8,6 +8,10 @@ defmodule Transporter.LoggingUser do
   end
 
   def call(conn, opts) do
+    IO.puts("\n\n\n")
+    IO.inspect(conn.remote_ip)
+    IO.puts("\n\n\n")
+
     cond do
       conn.private.plug_session["user_id"] == nil ->
         if conn.request_path == "/login" or conn.request_path == "/authenticate_login" do

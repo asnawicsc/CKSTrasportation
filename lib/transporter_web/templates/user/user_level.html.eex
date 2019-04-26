@@ -1,0 +1,8 @@
+
+<select name="user_id">
+	
+<%= for user <- @users do %>
+<option value="<%= user.id%>"><%= user.username %></option>
+
+<% end %>
+</select>

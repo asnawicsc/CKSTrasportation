@@ -1,13 +1,15 @@
 <style type="text/css">
   .large {
-     width: 1600px;
+    width: 1600px;
   }
+
   .small {
-     width: 600px;
+    width: 600px;
   }
 </style>
 <div class="row">
-  <div class="col-sm-12"  id="main" >
+
+  <div class="col-sm-12" id="main">
     <div class="card border-primary" style="overflow-x: scroll;">
       <div>
 
@@ -40,7 +42,7 @@
 
             <th class="detail">Transfer</th>
             <th class="detail">Transit</th>
-            <th class="detail" >Dest</th>
+            <th class="detail">Dest</th>
             <th class="detail">Returned</th>
 
             <th>DD</th>
@@ -74,20 +76,35 @@
                 <%= inf.etb |> Timex.shift(hours: 8) |> Timex.format!( "%d/%m", :strftime)%>
               </td>
               <td class="detail">
-                <%= if inf.forwarder_assigned != nil do  %>
-                  <%=  inf.forwarder_assigned.pic %>
+                <%= if inf.forwarder_ack != nil do  %>
+                  <%=  inf.forwarder_ack.pic %>
 
                     <% else %>
+
+                       <%= if inf.forwarder_assigned != nil do  %>
+
+                       <center>
+
+                        <div class="btn btn-warning btn-xs " id="<%= inf.job_id %>" style="font-size: 8px;">P</div>
+                      </center>
+
+                       <% else %>
+                        <center>
+
+                        <div class="btn btn-success btn-xs assign_forwarder" id="<%= inf.job_id %>" style="font-size: 8px;">A</div>
+                      </center>
+                       <% end %>
+
+                     
 
                       <% end %>
               </td>
               <td class="detail">
-                <%= if inf.forwarder_assigned != nil do  %>
+                <%= if inf.forwarder_ack != nil do  %>
 
-                  <%=  inf.forwarder_assigned.datetime |> Timex.shift(hours: 8) |> Timex.format!( "%d/%m %H:%M", :strftime)%>
+                  <%=  inf.forwarder_ack.datetime |> Timex.shift(hours: 8) |> Timex.format!( "%d/%m %H:%M", :strftime)%>
 
                     <% else %>
-
                       <% end %>
               </td>
               <td class="detail" style="color: red;">0</td>
@@ -169,8 +186,8 @@
 
     </div>
   </div>
-  <div class="col-sm-6" id="show_job" style="display: none;" >
-    
+  <div class="col-sm-6" id="show_job" style="display: none;">
+
   </div>
 </div>
 <div class="row">
@@ -189,8 +206,8 @@
             <th>Status</th>
             <th>Trailers</th>
             <th>Return Depot</th>
-            <th>Driver</th>
             <th style="width: 100px;">Routes Used</th>
+            <th>Action</th>
 
           </tr>
         </thead>
@@ -201,7 +218,7 @@
                 <%= container.job_no %>
               </td>
 
-              <td>
+              <td >
                 <%= container.name %>
               </td>
               <td>
@@ -213,12 +230,13 @@
               <td>
                 <%= container.return_depot %>
               </td>
-              <td>
-                <%= container.driver_name %>
-              </td>
-              <td id="<%= container.id %>" style="width: 100px;">
+             
+              <td id="<%= container.id %>" style="width: 100px;" >
 
                 <ol class="route_used" id="<%= container.id %>" style="padding-left: 0px;"></ol>
+              </td>
+              <td>
+                <div class="btn btn-xs btn-success cont" container="<%= container.id %>">+</div>
               </td>
 
             </tr>
@@ -277,10 +295,40 @@
     </div>
   </div>
 </div>
+<form method="post" action="/user_jobs/save_assignment" id="map_job">
+  <input type="hidden" name="_csrf_token" value="<%= Phoenix.Controller.get_csrf_token %>">
+  <input type="hidden" name="map_job">
+  <button class="btn btn-xs btn-success"><em class="fa fa-save"></em> Save Assignment</button>
+
+</form>
+<form action="/create_route" method="POST" id="route" style="display: none;">
+   <input type="hidden" name="_csrf_token" value="<%= Phoenix.Controller.get_csrf_token %>">
+   <input type="hidden" name="container_route[container_id]">
+   <label>From</label>
+   <select name="container_route[from]" class="custom-select" placeholder="asd">
+     
+     
+     <%= for loc <- @locations do %>
+       <option val="<%= loc.id %>"><%= loc.name %></option>
+     <% end %>
+   </select>
+   <label>To</label>
+   <select name="container_route[to]" class="custom-select">
+     
+    
+     <%= for loc <- @locations do %>
+       <option val="<%= loc.id %>"><%= loc.name %></option>
+     <% end %>
+   </select>
+   <button>Add Route</button>
+   <label>Driver</label><br>
+</form>
 <script type="text/javascript">
   $("table#main").DataTable({
     "dom": '<"card-body"rtif>',
-    "order": [[ 22, 'desc' ]]
+    "order": [
+      [22, 'desc']
+    ]
   });
   $("table#cont").DataTable({
     "dom": '<"card-body"rtif>'
@@ -289,26 +337,19 @@
     "dom": '<"card-body"rtif>'
   });
   $(document).ready(function() {
-
-$(document).on("click", "td.show_job", function(){
-  var job_id = $(this).attr("id")
-   $.ajax({
-               url: "/api/webhook",
-            dataType: "json",
-            data: {
-              scope: "show_job",
-              job_id: job_id,
-       
-            }
-          }).done(function(j) {
-            $("div#show_job").html(j);
-          });
-
-
-})
-    
-
-
+    $(document).on("click", "td.show_job", function() {
+      var job_id = $(this).attr("id")
+      $.ajax({
+        url: "/api/webhook",
+        dataType: "json",
+        data: {
+          scope: "show_job",
+          job_id: job_id,
+        }
+      }).done(function(j) {
+        $("div#show_job").html(j);
+      });
+    })
     $("ol.route_used").each(function() {
       var cont_id = $(this).attr("id")
       var html = $(this)
@@ -323,19 +364,107 @@ $(document).on("click", "td.show_job", function(){
         var result = j
         console.log(j)
         for (i in result) {
-          html.append("<li><span class='badge badge-primary' style='font-size: 8px;'>" + result[i]["from"] + "</span> - <span class='badge badge-danger' style='font-size: 8px;'>" + result[i]["to"] + "</span></li>")
+          html.append("<li><span class='badge badge-primary' style='width: 130px; font-size: 8px;'>" + result[i]["from"] + "</span><span class='badge badge-danger' style='width: 130px; font-size: 8px;'>" + result[i]["to"] + "</span><span class='badge badge-warning' style='width: 130px; font-size: 8px;'>" + result[i]["driver"] + " " +result[i]["truck"]+ " " + result[i]["no"] + "</span></li>")
         }
       })
     })
   })
   $(document).on("dblclick", "tr.job", function() {
-    
+    $("th.detail,td.detail").animate({
+      width: "toggle",
+      opacity: "toggle"
+    });
+    $("div#main").toggleClass("col-sm-12 col-sm-6")
+    $("table#main").toggleClass("large small")
+    $("div#show_job").animate({
+      opacity: "toggle"
+    });
+  })
+  $(document).on("click", ".cont", function() {
+      var container_id = $(this).attr("container");
+      var form = $("form#route").clone();
+      form.attr("id", "report3")
+        form.attr("style", "")
+      var bt = form.find("button").clone();
+      form.find("button").hide();
+      form.find("input[name='container_route[container_id]']").val(container_id)
+
+      $.ajax({
+        url: "/api/webhook",
+        dataType: "json",
+        data: {
+          scope: "get_users",
+          level: "LorryDriver"
+        }
+      }).done(function(j) {
+        var result = j
+        console.log(j)
+
+        form.append(j)
+      $("#myModalSmall").find(".modal-title").html("Choose a route");
+      $("#myModalSmall").find(".modal-body").html("");
+      $("#myModalSmall").find(".modal-body").html(form);
+      var bb = '<button class="btn btn-secondary" type="button" data-dismiss="modal">Close</button>';
+      $("#myModalSmall").find(".modal-footer").html("");
+      $("#myModalSmall").find(".modal-footer").append(bb);
+      $("#myModalSmall").find(".modal-footer").append(bt);
+      bt.click(function() {
+        form.submit();
+      })
+     
+      $("#myModalSmall").modal();
+
+      })
       
-      $("th.detail,td.detail").animate({width: "toggle", opacity: "toggle"});
-      $("div#main").toggleClass("col-sm-12 col-sm-6")
-
-      $("table#main").toggleClass("large small")
-
-          $("div#show_job").animate({ opacity: "toggle"});
     })
+  $(document).on("click", ".assign_forwarder", function() {
+    var job_id = $(this).attr("id");
+    var container_id = 0;
+    var user_id = 0;
+    var form = $("form#map_job").clone();
+    form.attr("id", "report")
+    form.attr("style", "")
+    var bt = form.find("button").clone();
+    form.find("button").hide();
+    $.ajax({
+        url: "/api/webhook",
+        dataType: "json",
+        data: {
+          scope: "get_users",
+          level: "Forwarder"
+        }
+      }).done(function(j) {
+        var result = j
+        console.log(j)
+
+        form.append(j)
+
+
+        $("#myModalSmall").find(".modal-title").html("Assign job to?");
+        $("#myModalSmall").find(".modal-body").html("");
+        $("#myModalSmall").find(".modal-body").html(form);
+        var bb = '<button class="btn btn-secondary" type="button" data-dismiss="modal">Close</button>';
+        $("#myModalSmall").find(".modal-footer").html("");
+        $("#myModalSmall").find(".modal-footer").append(bb);
+        $("#myModalSmall").find(".modal-footer").append(bt);
+
+        bt.click(function() {
+
+          var map = {
+            "user_id": $("select[name='user_id']").val(),
+            "job_id": job_id,
+            "container_id": container_id
+          };
+          var val = $("input[name='map_job']").val();
+         
+          var list = [];
+         
+          list.push(map);
+          var val = $("input[name='map_job']").val(JSON.stringify(list));
+          form.submit();
+        })
+        $("#myModalSmall").modal();
+      })
+
+  })
 </script>

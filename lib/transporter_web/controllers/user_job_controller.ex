@@ -3,7 +3,7 @@ defmodule TransporterWeb.UserJobController do
 
   alias Transporter.Logistic
   alias Transporter.Logistic.UserJob
-  # require IEx
+  require IEx
 
   def save_assignment(conn, params) do
     if params["map_job"] == "" do
@@ -192,7 +192,7 @@ defmodule TransporterWeb.UserJobController do
 
       conn
       |> put_flash(:info, "User job created successfully.")
-      |> redirect(to: user_path(conn, :index))
+      |> redirect(to: page_path(conn, :index))
     end
   end
 

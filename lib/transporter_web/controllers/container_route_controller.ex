@@ -24,11 +24,26 @@ defmodule TransporterWeb.ContainerRouteController do
     params = Map.put(params, "from_id", from.id)
     params = Map.put(params, "to_id", to.id)
 
+    params =
+      if conn.params["user_id"] != nil do
+        user = Repo.get(User, conn.params["user_id"])
+
+        if user != nil do
+          params = Map.put(params, "driver_id", user.id)
+          params = Map.put(params, "driver", user.username)
+          params
+        else
+          params
+        end
+      else
+        params
+      end
+
     case Logistic.create_container_route(params) do
       {:ok, container_route} ->
         conn
         |> put_flash(:info, "Container route created successfully.")
-        |> redirect(to: user_path(conn, :index))
+        |> redirect(to: page_path(conn, :index))
 
       {:error, %Ecto.Changeset{} = changeset} ->
         render(conn, "new.html", changeset: changeset)
